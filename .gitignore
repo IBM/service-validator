@@ -1,0 +1,11 @@
+# --- Code Editors --- #
+
+*.vscode
+
+# --- Schemathesis --- #
+
+*.hypothesis
+
+# --- Python --- #
+
+__pycache__
