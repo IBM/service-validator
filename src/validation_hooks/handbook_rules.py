@@ -31,7 +31,7 @@ def accept_header(response: Response, case: Case) -> None:
         assert (
             response.headers
             and "Content-Type" in response.headers
-            and response.headers["Content-Type"] == "application/json; charset=utf-8"
+            and response.headers["Content-Type"].startswith("application/json")
         )
 
 
