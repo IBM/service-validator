@@ -21,9 +21,6 @@ def body_no_content_type(response, case):
 
 @schemathesis.register_check
 def accept_header(response, case):
-    # NOTE: when we are looking for a specific header in case, we can find it
-    # easily because we can use only lower-case header names. However, we are
-    # not guaranteed on what case convention will be used in the response headers.
     requestHeaders = response.request.headers
     if not requestHeaders or 'accept' not in requestHeaders:
         assert response.headers and 'Content-Type' in response.headers and response.headers['Content-Type'] == 'application/json; charset=utf-8'
