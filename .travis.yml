@@ -3,7 +3,7 @@ language: python
 python: "3.7"
 
 notifications:
-  email: true
+  email: false
 
 # cache pre-commit to speed up builds
 cache:

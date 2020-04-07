@@ -1,13 +1,14 @@
-from test.validation_hooks import mock_decorator
-
 import pytest
-from requests.models import Response
-from src.validation_hooks import handbook_rules
 
 import schemathesis
+from requests.models import Response
 from schemathesis.models import Case
 
-schemathesis.register_check = mock_decorator
+from test.validation_hooks import mock_decorator
+
+schemathesis.register_check = mock_decorator  # must occur before handbook rules imported
+
+from src.validation_hooks import handbook_rules
 
 
 def test_201_status_code_positive():
