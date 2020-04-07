@@ -1,5 +1,6 @@
-import schemathesis
 from requests.models import Response
+
+import schemathesis
 from schemathesis.models import Case
 
 
