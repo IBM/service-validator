@@ -9,5 +9,15 @@
 # --- Python --- #
 
 __pycache__
+
+# --- Linters --- #
+
 *.pytest_cache
 *.mypy_cache
+
+# --- Testing --- #
+
+*.coverage.*
+coverage.xml
+.coverage
+*.tox

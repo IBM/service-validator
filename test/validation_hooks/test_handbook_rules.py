@@ -1,8 +1,13 @@
+from test.validation_hooks import mock_decorator
+
 import pytest
 from requests.models import Response
+from src.validation_hooks import handbook_rules
+
+import schemathesis
 from schemathesis.models import Case
 
-from src.validation_hooks.handbook_rules import handbook_rules
+schemathesis.register_check = mock_decorator
 
 
 def test_201_status_code_positive():
@@ -10,7 +15,7 @@ def test_201_status_code_positive():
     mock_response = Response()
     mock_response.status_code = 201
     # no location header, should raise an error
-    with pytest.raises(Exception):
+    with pytest.raises(AssertionError):
         handbook_rules.location_201(mock_response, mock_case)
 
 

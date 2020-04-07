@@ -1,0 +1,14 @@
+[run]
+branch = true
+parallel = true
+source = src
+
+[paths]
+source = src
+
+[report]
+show_missing = true
+precision = 2
+exclude_lines =
+   raise NotImplementedError
+   pass

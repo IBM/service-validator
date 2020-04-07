@@ -5,10 +5,21 @@ python: "3.7"
 notifications:
   email: true
 
+# cache pre-commit to speed up builds
+cache:
+  directories:
+  - $HOME/.cache/pre-commit
+
 jobs:
   include:
 
-    - stage: linter and code format
+    - stage: linter and code formatter
       script:
         - pip install pre-commit
         - pre-commit run --all-files
+
+    - stage: test suite
+      install:
+        - pip install tox
+      script:
+        - tox -e py37
