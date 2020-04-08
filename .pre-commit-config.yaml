@@ -51,7 +51,6 @@ repos:
     rev: v2.4.4
     hooks:
       - id: pylint
-        additional_dependencies: ["isort[pyproject]"]
         exclude: ^(docs/|test/).*$
         # disabled import-error as may be run out of environment with deps
         args: ["--disable=import-error"]
