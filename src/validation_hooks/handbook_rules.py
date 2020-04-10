@@ -5,18 +5,6 @@ from schemathesis.models import Case
 
 
 @schemathesis.register_check
-def accept_header(response: Response, case: Case) -> None:
-    request_headers = response.request.headers
-    if response.content:
-        if not request_headers or "Accept" not in request_headers:
-            assert (
-                response.headers
-                and "Content-Type" in response.headers
-                and response.headers["Content-Type"].startswith("application/json")
-            ), "Accept header not provided in the request. Response must be JSON, and Content-Type header must start with application/json."
-
-
-@schemathesis.register_check
 def allow_header_in_405(response: Response, case: Case) -> None:
     if response.status_code == 405:
         assert (
@@ -60,6 +48,18 @@ def no_422(response: Response, case: Case) -> None:
     assert (
         response.status_code != 422
     ), "422 code should not be used. Instead, 400 should be returned in response to invalid request payloads."
+
+
+@schemathesis.register_check
+def no_accept_header(response: Response, case: Case) -> None:
+    request_headers = response.request.headers
+    if response.content:
+        if not request_headers or "Accept" not in request_headers:
+            assert (
+                response.headers
+                and "Content-Type" in response.headers
+                and response.headers["Content-Type"].startswith("application/json")
+            ), "Accept header not provided in the request. Response must be JSON, and Content-Type header must start with application/json."
 
 
 @schemathesis.register_check

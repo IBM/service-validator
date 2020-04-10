@@ -1,6 +1,9 @@
 ---
 language: python
-python: "3.7"
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
 
 notifications:
   email: false
@@ -22,4 +25,4 @@ jobs:
       install:
         - pip install tox
       script:
-        - tox -e py37
+        - tox
