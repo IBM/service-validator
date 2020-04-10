@@ -25,4 +25,4 @@ jobs:
       install:
         - pip install tox
       script:
-        - tox
+        - tox -e py37
