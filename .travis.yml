@@ -27,8 +27,7 @@ jobs:
 
       # if commit tagged for release, deploys to releases tab
       before_deploy:
-        - pip install setuptools
-        - python3 -m pip install --user --upgrade setuptools wheel
+        - python3 -m pip install setuptools wheel
         - python3 setup.py sdist bdist_wheel
       deploy:
         provider: releases
