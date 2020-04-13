@@ -90,7 +90,7 @@ CHECKS_TYPE = click.Choice((*ALL_CHECKS_NAMES, "all"))
 )
 @click.option(
     "--hypothesis-phases",
-    default=[hypothesis.Phase.explicit],
+    default="explicit",
     type=CSVOption(hypothesis.Phase),
     help="Control which phases should be run.",
 )
