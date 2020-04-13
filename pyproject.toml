@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "schemathesis-ibm"
-version = "0.1"
+version = "0.0.1"
 description = "Extension of endpoint validator, Schemathesis."
 packages = [
     { include = "src" }

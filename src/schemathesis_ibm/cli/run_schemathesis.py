@@ -90,7 +90,7 @@ CHECKS_TYPE = click.Choice((*ALL_CHECKS_NAMES, "all"))
 )
 @click.option(
     "--hypothesis-phases",
-    default=[hypothesis.Phase.explicit],
+    default="explicit",
     type=CSVOption(hypothesis.Phase),
     help="Control which phases should be run.",
 )
@@ -157,7 +157,9 @@ def run_schemathesis(  # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
 
     # Register hooks
-    context.invoke(register_hooks, pre_run="src.validation_hooks.handbook_rules")
+    context.invoke(
+        register_hooks, pre_run="schemathesis_ibm.validation_hooks.handbook_rules"
+    )
 
     # Invoke Schemathesis
     context.forward(run)

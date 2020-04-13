@@ -10,12 +10,14 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 
 ## Install
 
-1. Install Schemathesis globally with `pip install schemathesis`.
-2. Clone this repository.
+1. Find the version of the endpoint validator you want to use in the [releases](https://github.ibm.com/CloudEngineering/schemathesis-endpoint-validator/releases) tab.
+2. Download the corresponding .whl (recommended) or .tar.gz file.
+3. `pip install schemathesis_ibm-<version>.whl` or `pip install schemathesis_ibm-<version>.tar.gz`
 
 ## Use
 
-1. Change your current working directory to the root of this repository (`cd <path to schemathesis-endpoint-validator>`).
-2. Run `python3 src/cli/run_schemathesis.py --api-def <path to your API definition> --base-url <base URL of API>`
+Basic use:
+
+    schemathesis-ibm --api-def <path API definition> --base-url <base URL of API>
 
 ## Including Examples in API Definition

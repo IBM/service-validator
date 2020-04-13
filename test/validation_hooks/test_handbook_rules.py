@@ -11,7 +11,7 @@ from test.validation_hooks import (
 
 schemathesis.register_check = mock_decorator  # must occur before handbook rules imported
 
-from src.validation_hooks import handbook_rules
+from src.schemathesis_ibm.validation_hooks import handbook_rules
 
 
 def test_allow_header_in_405_positive():

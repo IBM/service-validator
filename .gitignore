@@ -2,18 +2,24 @@
 
 *.vscode
 
-# --- Schemathesis --- #
+# --- Linters --- #
 
-*.hypothesis
+*.pytest_cache
+*.mypy_cache
 
 # --- Python --- #
 
 __pycache__
 
-# --- Linters --- #
+# --- Schemathesis --- #
 
-*.pytest_cache
-*.mypy_cache
+*.hypothesis
+
+# --- Setuptools --- #
+
+build
+dist
+schemathesis_ibm.egg-info
 
 # --- Testing --- #
 

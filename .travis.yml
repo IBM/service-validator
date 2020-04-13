@@ -1,9 +1,6 @@
 ---
 language: python
-python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
+python: "3.7"
 
 notifications:
   email: false
@@ -11,14 +8,15 @@ notifications:
 # cache pre-commit to speed up builds
 cache:
   directories:
-  - $HOME/.cache/pre-commit
+    - $HOME/.cache/pre-commit
 
 jobs:
   include:
 
     - stage: linter and code formatter
-      script:
+      install:
         - pip install pre-commit
+      script:
         - pre-commit run --all-files
 
     - stage: test suite
@@ -26,3 +24,17 @@ jobs:
         - pip install tox
       script:
         - tox -e py37
+
+      # if commit tagged for release, deploys to releases tab
+      before_deploy:
+        - pip install setuptools
+        - python3 -m pip install --user --upgrade setuptools wheel
+        - python3 setup.py sdist bdist_wheel
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        file_glob: true
+        file: dist/*
+        skip_cleanup: true
+        on:
+          tags: true
