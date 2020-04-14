@@ -13,24 +13,17 @@ cache:
 jobs:
   include:
 
-    - stage: linter and code formatter
+    - stage: linting, code formatting, and unit tests
       install:
         - pip install pre-commit
-      script:
-        - pre-commit run --all-files
-
-    - stage: test suite
-      install:
         - pip install tox
       script:
+        - pre-commit run --all-files
         - tox -e py37
 
-    - stage: deploy to releases
-      install:
+      before_deploy:
         - python3 -m pip install setuptools wheel
-      script:
         - python3 setup.py sdist bdist_wheel
-
       deploy:
         provider: releases
         api_key: $GH_TOKEN
