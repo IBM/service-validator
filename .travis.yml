@@ -25,10 +25,12 @@ jobs:
       script:
         - tox -e py37
 
-      # if commit tagged for release, deploys to releases tab
-      before_deploy:
+    - stage: deploy to releases
+      install:
         - python3 -m pip install setuptools wheel
+      script:
         - python3 setup.py sdist bdist_wheel
+
       deploy:
         provider: releases
         api_key: $GH_TOKEN
