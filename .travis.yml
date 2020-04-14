@@ -13,25 +13,26 @@ cache:
 env:
   global:
     - OCTOKIT_API_ENDPOINT="https://api.github.ibm.com"
-  jobs:
-    include:
 
-      - stage: linting, code formatting, and unit tests
-        install:
-          - pip install pre-commit
-          - pip install tox
-        script:
-          - pre-commit run --all-files
-          - tox -e py37
+jobs:
+  include:
 
-        before_deploy:
-          - python3 -m pip install setuptools wheel
-          - python3 setup.py sdist bdist_wheel
-        deploy:
-          provider: releases
-          api_key: $GH_TOKEN
-          file_glob: true
-          file: dist/*
-          skip_cleanup: true
-          on:
-            tags: true
+    - stage: linting, code formatting, and unit tests
+      install:
+        - pip install pre-commit
+        - pip install tox
+      script:
+        - pre-commit run --all-files
+        - tox -e py37
+
+      before_deploy:
+        - python3 -m pip install setuptools wheel
+        - python3 setup.py sdist bdist_wheel
+      deploy:
+        provider: releases
+        api_key: $GH_TOKEN
+        file_glob: true
+        file: dist/*
+        skip_cleanup: true
+        on:
+          tags: true
