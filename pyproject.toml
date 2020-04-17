@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "schemathesis-ibm"
+name = "ibm-service-validator"
 version = "0.0.1"
 description = "Extension of endpoint validator, Schemathesis."
 packages = [
@@ -20,7 +20,7 @@ classifiers = [
 ]
 authors = ["Barrett Schonefeld <barrett.schonefeld@ibm.com>"]
 readme = "README.md"
-repository = "https://github.ibm.com/CloudEngineering/schemathesis-endpoint-validator"
+repository = "https://github.ibm.com/CloudEngineering/ibm-service-validator"
 
 [tool.poetry.dependencies]
 python = "^3.6"

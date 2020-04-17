@@ -1,4 +1,4 @@
-# schemathesis-endpoint-validator
+# ibm-service-validator
 
 Extends [Schemathesis](https://github.com/kiwicom/schemathesis) to test [IBM API Handbook](https://cloud.ibm.com/docs/api-handbook?topic=api-handbook-intro) compliance and consistency between an API implementation and its OpenAPI definition.
 
@@ -10,14 +10,14 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 
 ## Install
 
-1. Find the version of the endpoint validator you want to use in the [releases](https://github.ibm.com/CloudEngineering/schemathesis-endpoint-validator/releases) tab.
+1. Find the version of the endpoint validator you want to use in the [releases](https://github.ibm.com/CloudEngineering/ibm-service-validator/releases) tab.
 2. Download the corresponding .whl (recommended) or .tar.gz file.
-3. `pip install schemathesis_ibm-<version>.whl` or `pip install schemathesis_ibm-<version>.tar.gz`
+3. `pip install ibm_service_validator-<version>.whl` or `pip install ibm_service_validator-<version>.tar.gz`
 
 ## Use
 
 Basic use:
 
-    schemathesis-ibm --api-def <path API definition> --base-url <base URL of API>
+    ibm-service-validator --api-def <path API definition> --base-url <base URL of API>
 
 ## Including Examples in API Definition

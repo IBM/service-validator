@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="schemathesis_ibm",
+    name="ibm_service_validator",
     version="0.0.1",
     description="Python package, Schemathesis, extended to include IBM API Handbook validation.",
-    url="https://github.ibm.com/CloudEngineering/schemathesis-endpoint-validator",
+    url="https://github.ibm.com/CloudEngineering/ibm-service-validator",
     author="Barrett Schonefeld, IBM",
     author_email="barrett.schonefeld@ibm.com",
     packages=find_packages("src"),
@@ -13,7 +13,7 @@ setup(
     install_requires=["click", "schemathesis"],
     entry_points="""
         [console_scripts]
-        schemathesis-ibm=schemathesis_ibm.cli.run_schemathesis:run_schemathesis
+        ibm-service-validator=ibm_service_validator.cli.run_schemathesis:run_schemathesis
     """,
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -158,7 +158,7 @@ def run_schemathesis(  # pylint: disable=too-many-arguments
 
     # Register hooks
     context.invoke(
-        register_hooks, pre_run="schemathesis_ibm.validation_hooks.handbook_rules"
+        register_hooks, pre_run="ibm_service_validator.validation_hooks.handbook_rules"
     )
 
     # Invoke Schemathesis
