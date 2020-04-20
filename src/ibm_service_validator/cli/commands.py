@@ -3,7 +3,7 @@ from typing import Dict, Iterable, List, Optional, Tuple, Union
 import click
 import hypothesis
 
-from schemathesis.cli import run
+from schemathesis.cli import run as run_schemathesis
 from schemathesis.cli import schemathesis as register_hooks
 from schemathesis.cli.options import CSVOption, OptionalInt, NotSet
 from schemathesis.cli import callbacks
@@ -133,7 +133,7 @@ CHECKS_TYPE = click.Choice((*ALL_CHECKS_NAMES, "all"))
     help="Filter schemathesis test by schema tag pattern.",
 )
 @click.pass_context
-def run_schemathesis(  # pylint: disable=too-many-arguments
+def run(  # pylint: disable=too-many-arguments
     context: click.Context,
     schema: str,
     auth: Optional[Tuple[str, str]],
@@ -162,8 +162,4 @@ def run_schemathesis(  # pylint: disable=too-many-arguments
     )
 
     # Invoke Schemathesis
-    context.forward(run)
-
-
-if __name__ == "__main__":
-    run_schemathesis()
+    context.forward(run_schemathesis)

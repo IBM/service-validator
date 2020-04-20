@@ -13,7 +13,7 @@ setup(
     install_requires=["click", "schemathesis"],
     entry_points="""
         [console_scripts]
-        ibm-service-validator=ibm_service_validator.cli.run_schemathesis:run_schemathesis
+        ibm-service-validator=ibm_service_validator.cli.commands:run
     """,
     classifiers=[
         "Programming Language :: Python :: 3",
