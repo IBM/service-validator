@@ -3,16 +3,16 @@ from typing import Dict, Iterable, List, Optional, Tuple, Union
 import click
 import hypothesis
 
-from schemathesis.cli import run as run_schemathesis
-from schemathesis.cli import schemathesis as register_hooks
 from schemathesis.cli.options import CSVOption, OptionalInt, NotSet
-from schemathesis.cli import callbacks
+from schemathesis.cli import callbacks, execute, load_hook
+from schemathesis import loaders, runner
 
 from schemathesis.types import Filter
 from schemathesis import checks as checks_module
 
 ALL_CHECKS_NAMES = tuple(check.__name__ for check in checks_module.ALL_CHECKS)
 CHECKS_TYPE = click.Choice((*ALL_CHECKS_NAMES, "all"))
+DEFAULT_WORKERS = 1
 
 
 @click.command()
@@ -73,7 +73,7 @@ CHECKS_TYPE = click.Choice((*ALL_CHECKS_NAMES, "all"))
 )
 @click.option(
     "--hypothesis-deadline",
-    # max value to avoid overflow. It is maximum amount of days in milliseconds
+    # max value to avoid overflow. It is maximum amount of days in milliseconds.
     type=OptionalInt(1, 999999999 * 24 * 3600 * 1000),
     help="Duration in milliseconds that each individual example with a test is not allowed to exceed.",
 )
@@ -157,9 +157,39 @@ def run(  # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
 
     # Register hooks
-    context.invoke(
-        register_hooks, pre_run="ibm_service_validator.validation_hooks.handbook_rules"
-    )
+    load_hook("ibm_service_validator.validation_hooks.handbook_rules")
+
+    if "all" in checks:
+        selected_checks = checks_module.ALL_CHECKS
+    else:
+        selected_checks = tuple(
+            check for check in checks_module.ALL_CHECKS if check.__name__ in checks
+        )
 
     # Invoke Schemathesis
-    context.forward(run_schemathesis)
+    prepared_runner = runner.prepare(
+        schema,
+        app=None,
+        auth=auth,
+        auth_type=auth_type,
+        base_url=base_url,
+        checks=selected_checks,
+        endpoint=endpoints,
+        exit_first=exit_first,
+        headers=headers,
+        loader=loaders.from_path,
+        method=methods,
+        request_timeout=request_timeout,
+        seed=hypothesis_seed,
+        tag=tags,
+        validate_schema=True,
+        workers_num=DEFAULT_WORKERS,
+        hypothesis_deadline=hypothesis_deadline,
+        hypothesis_derandomize=hypothesis_derandomize,
+        hypothesis_max_examples=hypothesis_max_examples,
+        hypothesis_phases=hypothesis_phases,
+        hypothesis_report_multiple_bugs=False,
+        hypothesis_suppress_health_check=None,
+        hypothesis_verbosity=hypothesis_verbosity,
+    )
+    execute(prepared_runner, DEFAULT_WORKERS, show_errors_tracebacks)
