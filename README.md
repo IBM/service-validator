@@ -29,7 +29,7 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 - -x (--exitfirst): exit and report on the first error or test failure.
 - --show-errors-tracebacks: show error tracebacks for internal errors.
 - --hypothesis-deadline: number of milliseconds allowed for the server to respond (default is 500). Example: `--hypothesis-deadline=300`.
-- --hypothesis-phases: determines how test data will be generated. **By default, "explicit" indicates test data will only be generated from examples in the OpenAPI definition.** Example: `--hypothesis-deadline=explicit,generate` will use explicit OpenAPI examples and generate test data.
+- --hypothesis-phases: determines how test data will be generated. **The default value, `explicit`, indicates test data will only be generated from examples in the OpenAPI definition.** Example: `--hypothesis-deadline=explicit,generate` will use explicit OpenAPI examples and generate test data.
   - `explicit`: test data generated from examples. Recommended.
   - `reuse`: reuse old test data.
   - `generate`: test data generated from schema definition.
