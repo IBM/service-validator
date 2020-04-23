@@ -26,9 +26,6 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 - -A (--auth-type): authentication mechanism. May be "basic" or "digest" (default is "basic").
 - -b (--base-url): base url of the service to be tested.
 - -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
-- -E (--endpoint): filter out endpoints with a given pattern.
-- -M (--method): filter out HTTP methods with a given pattern.
-- -T (--tag): filter tests by tags with a given pattern.
 - -x (--exitfirst): exit and report on the first error or test failure.
 - --show-errors-tracebacks: show error tracebacks for internal errors.
 - --hypothesis-deadline: number of milliseconds allowed for the server to respond (default is 500). Example: `--hypothesis-deadline=300`.
@@ -43,6 +40,12 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
   - `normal`
   - `verbose`
   - `debug`
+
+Filter tests by endpoints, methods, and/or tags that match a given endpoint/method/tag pattern.
+
+- -E (--endpoint)
+- -M (--method)
+- -T (--tag)
 
 Options when generating test data from schema definitions (test data comes from OpenAPI examples by default):
 
