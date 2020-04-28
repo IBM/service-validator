@@ -21,6 +21,10 @@ build
 dist
 schemathesis_ibm.egg-info
 
+# --- Service Validator Config --- #
+
+ibm-service-validator-config.*
+
 # --- Testing --- #
 
 *.coverage.*

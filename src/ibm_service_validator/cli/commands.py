@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import click
 import hypothesis
@@ -9,6 +9,11 @@ from schemathesis import loaders, runner
 
 from schemathesis.types import Filter
 from schemathesis import checks as checks_module
+from schemathesis.models import Case
+from requests.models import Response
+
+from process_config import process_config_file
+from ibm_service_validator.validation_hooks import HANDBOOK_RULE_NAMES
 
 ALL_CHECKS_NAMES = tuple(check.__name__ for check in checks_module.ALL_CHECKS)
 CHECKS_TYPE = click.Choice((*ALL_CHECKS_NAMES, "all"))
@@ -52,7 +57,7 @@ DEFAULT_WORKERS = 1
     multiple=True,
     type=str,
     callback=callbacks.validate_headers,
-    help="Custom header that will be used in all requests to the server. Example: Authorization: Bearer 123",
+    help="Custom header will be used in all requests to server. Ex: Authorization: Bearer 123",
 )
 @click.option(
     "--endpoint",
@@ -75,7 +80,7 @@ DEFAULT_WORKERS = 1
     "--hypothesis-deadline",
     # max value to avoid overflow. It is maximum amount of days in milliseconds.
     type=OptionalInt(1, 999999999 * 24 * 3600 * 1000),
-    help="Duration in milliseconds that each individual example with a test is not allowed to exceed.",
+    help="Duration in milliseconds each individual example is not allowed to exceed.",
 )
 @click.option(
     "--hypothesis-derandomize",
@@ -132,9 +137,7 @@ DEFAULT_WORKERS = 1
     callback=callbacks.validate_regex,
     help="Filter schemathesis test by schema tag pattern.",
 )
-@click.pass_context
 def run(  # pylint: disable=too-many-arguments
-    context: click.Context,
     schema: str,
     auth: Optional[Tuple[str, str]],
     auth_type: str,
@@ -156,15 +159,11 @@ def run(  # pylint: disable=too-many-arguments
 ) -> None:
     # pylint: disable=too-many-locals
 
-    # Register hooks
     load_hook("ibm_service_validator.validation_hooks.handbook_rules")
 
-    if "all" in checks:
-        selected_checks = checks_module.ALL_CHECKS
-    else:
-        selected_checks = tuple(
-            check for check in checks_module.ALL_CHECKS if check.__name__ in checks
-        )
+    checks_off = process_config_file()
+
+    selected_checks = get_all_checks(checks, checks_off)
 
     # Invoke Schemathesis
     prepared_runner = runner.prepare(
@@ -193,3 +192,24 @@ def run(  # pylint: disable=too-many-arguments
         hypothesis_verbosity=hypothesis_verbosity,
     )
     execute(prepared_runner, DEFAULT_WORKERS, show_errors_tracebacks)
+
+
+def get_all_checks(
+    checks: Iterable[str], handbook_checks_off: Iterable[str]
+) -> Iterable[Callable[[Response, Case], None]]:
+    if "all" in checks:
+        return tuple(
+            check
+            for check in checks_module.ALL_CHECKS
+            if check.__name__ not in handbook_checks_off
+        )
+    else:
+        return tuple(
+            check
+            for check in checks_module.ALL_CHECKS
+            if check.__name__ in checks
+            or (
+                check.__name__ in HANDBOOK_RULE_NAMES
+                and check.__name__ not in handbook_checks_off
+            )
+        )

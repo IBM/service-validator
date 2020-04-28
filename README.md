@@ -53,6 +53,25 @@ Options when generating test data from schema definitions (test data comes from 
 - --hypothesis-max-examples: this value determines the maximum number of tests to generate for each method. Example: `--hypothesis-max-examples=50`.
 - --hypothesis-seed: provide a seed from which random test data will be generated.
 
+## Configuration
+
+### Configuration File
+
+Rules may be configured using a `ibm-service-validator-config.yaml` or `ibm-service-validator-config.json` file.
+
+We look for a configuration file in the current working directory from which the service validator is invoked, and we search up the directory until we find the first matching config file. It is recommended to create this configuration file in the root directory of your project.
+
+Rules may be on or off. An example of the configuration file is given below:
+
+    ibm_cloud_api_handbook:
+        allow_header_in_405: 'off'
+        invalid_request_content_type: 'off'
+        location_201: 'off'
+        no_422: 'off'
+        no_accept_header: 'off'
+        no_content_204: 'off'
+        www_authenticate_401: 'off'
+
 ## Including Examples in API Definition
 
 Often, a service's requirements are stricter than its schema. For example, an `account_id` may have schema, `type: string`. However, a valid `account_id` is restricted to the set of strings associated with an accounts. For this reason, the default way to generate requests is to use [OpenAPI examples](https://swagger.io/docs/specification/adding-examples/) in the API definition.

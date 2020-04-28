@@ -10,7 +10,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     include_package_data=True,
-    install_requires=["click", "schemathesis"],
+    install_requires=["click", "pyyaml", "schemathesis"],
     entry_points="""
         [console_scripts]
         ibm-service-validator=ibm_service_validator.cli.commands:run

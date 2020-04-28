@@ -5,7 +5,6 @@ jobs=0
 [MESSAGES CONTROL]
 disable =
   missing-docstring,
-  line-too-long,
   invalid-name,
   no-value-for-parameter,
   no-member,
@@ -14,14 +13,17 @@ disable =
   relative-import,
   wrong-import-position,
   bare-except,
+  line-too-long,
   locally-disabled,
   protected-access,
   abstract-method,
   no-self-use,
+  no-else-return,
   fixme,
   too-few-public-methods,
   bad-continuation,
-  inconsistent-return-statements
+  inconsistent-return-statements,
+  redefined-builtin
 
 
 [REPORTS]
@@ -30,4 +32,4 @@ output-format=colorized
 [FORMAT]
 logging-modules=
   logging,
-  structlog,
+  structlog
