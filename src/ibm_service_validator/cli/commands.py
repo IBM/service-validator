@@ -159,7 +159,8 @@ def run(  # pylint: disable=too-many-arguments
 ) -> None:
     # pylint: disable=too-many-locals
 
-    load_hook("ibm_service_validator.validation_hooks.handbook_rules")
+    load_hook("ibm_service_validator.validation_hooks.header_rules")
+    load_hook("ibm_service_validator.validation_hooks.status_code_rules")
 
     checks_off = process_config_file()
 
