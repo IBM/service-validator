@@ -24,7 +24,7 @@ repository = "https://github.ibm.com/CloudEngineering/ibm-service-validator"
 
 [tool.poetry.dependencies]
 python = "^3.6"
-schemathesis = "^1.0"
+schemathesis = "^1.3"
 click = "^7.0"
 
 [tool.poetry.dev-dependencies]
@@ -43,8 +43,8 @@ line_length = 90
 multi_line_output = 3
 default_section = "THIRDPARTY"
 include_trailing_comma = true
-known_first_party = "schemathesis"
-known_third_party = ["_pytest", "click", "pytest", "schemathesis"]
+known_first_party = "ibm_service_validator"
+known_third_party = ["_pytest", "click", "flask", "hypothesis", "ibm_service_validator", "pytest", "requests", "schemathesis", "setuptools", "yaml"]
 
 [build-system]
 requires = ["poetry>=0.12"]

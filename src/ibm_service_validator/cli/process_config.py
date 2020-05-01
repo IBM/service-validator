@@ -4,8 +4,9 @@ import os
 import json
 import yaml
 
-CONFIG_FILE_NAME = "ibm-service-validator-config"
-RULE_CONFIG_NAME = "ibm_cloud_api_handbook"
+CONFIG_FILE_NAME: str = "ibm-service-validator-config"
+HANDBOOK_CONFIG_NAME: str = "ibm_cloud_api_handbook"
+SCHEMATHESIS_CONFIG_NAME: str = "schemathesis_checks"
 
 
 def process_config_file() -> Iterable[str]:
@@ -37,13 +38,24 @@ def load_config_file_as_dict(dir: str) -> Dict[str, Any]:
 
 
 def checks_off(config: Dict[str, Any]) -> Iterable[str]:
-    all_rules = config[RULE_CONFIG_NAME] if RULE_CONFIG_NAME in config else None
+    """Returns set of all checks configured to off."""
 
-    if not all_rules or not isinstance(all_rules, dict):
+    handbook_rules = (
+        config[HANDBOOK_CONFIG_NAME] if HANDBOOK_CONFIG_NAME in config else None
+    )
+    schemathesis_rules = (
+        config[SCHEMATHESIS_CONFIG_NAME] if SCHEMATHESIS_CONFIG_NAME in config else None
+    )
+
+    return {*_checks_off(handbook_rules), *_checks_off(schemathesis_rules)}
+
+
+def _checks_off(config: Any) -> Iterable[str]:
+    if not config or not isinstance(config, dict):
         return set()
 
     # YAML treats unquoted off as implicit boolean. Hence, we check "not val".
-    return {rule for rule, val in all_rules.items() if val == "off" or not val}
+    return {rule for rule, val in config.items() if val == "off" or not val}
 
 
 def open_get_data_close(

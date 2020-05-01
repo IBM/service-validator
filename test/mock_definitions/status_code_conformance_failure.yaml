@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  license:
+    name: MIT
+  title: Example service
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /status_code_conformance_failure:
+    get:
+      tags:
+        - test_tag
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+          description: object successfully returned
+      operationId: get_string
+      summary: get a string
+components:
+  schemas:
+    StringResponse:
+      description: an object with string prop
+      properties:
+        foo:
+          type: string
+      type: object

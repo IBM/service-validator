@@ -65,12 +65,17 @@ Rules may be on or off. An example of the configuration file is given below:
 
     ibm_cloud_api_handbook:
         allow_header_in_405: 'off'
-        invalid_request_content_type: 'off'
+        default_response_content_type: 'off'
         location_201: 'off'
         no_422: 'off'
         no_accept_header: 'off'
         no_content_204: 'off'
         www_authenticate_401: 'off'
+    schemathesis_checks:
+        not_a_server_error: 'off'
+        status_code_conformance: 'off'
+        content_type_conformance: 'off'
+        response_schema_conformance: 'off'
 
 ## Including Examples in API Definition
 

@@ -1,0 +1,136 @@
+openapi: 3.0.0
+info:
+  license:
+    name: MIT
+  title: Example service
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /allof:
+    get:
+      tags:
+        - test_tag
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessSchema'
+          description: allof schema successfully returned
+      operationId: get_allof_schema
+      summary: get allof schema
+  /array:
+    get:
+      tags:
+        - test_tag
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayResponse'
+          description: array successfully returned
+      operationId: get_array
+      summary: get an array
+  /boolean:
+    get:
+      tags:
+        - test_tag
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooleanResponse'
+          description: boolean schema successfully returned
+      operationId: get_boolean
+      summary: get a boolean
+  /datetime:
+    get:
+      tags:
+        - test_tag
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Date'
+          description: date-time successfully returned
+      operationId: get_date_time
+      summary: get a date and time
+  /integer:
+    get:
+      tags:
+        - test_tag
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegerResponse'
+          description: object successfully returned
+      operationId: get_integer
+      summary: get an integer
+  /string:
+    get:
+      tags:
+        - test_tag
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+          description: object successfully returned
+      operationId: get_string
+      summary: get a string
+components:
+  schemas:
+    SuccessSchema:
+      allOf:
+        - properties:
+            foo:
+              type: integer
+          required:
+            - foo
+          type: object
+        - properties:
+            bar:
+              type: string
+          required:
+            - bar
+          type: object
+    ArrayResponse:
+      description: an object with an array prop
+      properties:
+        list:
+          items:
+            type: string
+          type: array
+      type: object
+    BooleanResponse:
+      description: an object with
+      properties:
+        foo:
+          type: boolean
+      type: object
+    Date:
+      description: an object with a date-time prop
+      properties:
+        foo:
+          format: date-time
+          type: string
+      type: object
+    IntegerResponse:
+      description: an object with an integer prop
+      properties:
+        foo:
+          type: integer
+      type: object
+    StringResponse:
+      description: an object with
+      properties:
+        foo:
+          type: string
+      type: object
