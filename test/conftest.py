@@ -26,6 +26,14 @@ def cli():
         def run(*args, **kwargs):
             return cli_runner.invoke(commands.run, args, **kwargs)
 
+        @staticmethod
+        def init(*args, **kwargs):
+            return cli_runner.invoke(commands.init, args, **kwargs)
+
+        @staticmethod
+        def main(*args, **kwargs):
+            return cli_runner.invoke(commands.ibm_service_validator, args, **kwargs)
+
     return Runner()
 
 
@@ -95,7 +103,7 @@ def mock_response():
 
 
 @pytest.fixture()
-def open_write_close():
+def write_to_file():
     def f(
         file_name: str, config: Dict[str, Any], dump: Callable[[Any, IO], None]
     ) -> None:
@@ -153,3 +161,10 @@ def status_code_failure() -> str:
 
     dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(dir, "mock_definitions", "status_code_conformance_failure.yaml")
+
+
+@pytest.fixture()
+def tmp_cwd(tmp_path):
+    """Set the cwd to a temporary path. Return path."""
+    os.chdir(tmp_path)
+    return tmp_path

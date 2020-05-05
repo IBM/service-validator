@@ -18,9 +18,9 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 
 ### Command line
 
-    ibm-service-validator <path API definition> --base-url <base URL of API> [options]
+    ibm-service-validator run <path API definition> --base-url <base URL of API> [options]
 
-#### [options]
+#### run [options]
 
 - -a (--auth): provide server username and password in the form `username:password`.
 - -A (--auth-type): authentication mechanism. May be "basic" or "digest" (default is "basic").
@@ -76,6 +76,17 @@ Rules may be on or off. An example of the configuration file is given below:
         status_code_conformance: 'off'
         content_type_conformance: 'off'
         response_schema_conformance: 'off'
+
+### Create Default Configuration File
+
+To initialize a default configuration file in the current working directory, use:
+
+    ibm-service-validator init [options]
+
+#### init [options]
+
+- -o (--overwrite): if config file already exists, overwrite the existing config file with default values.
+- -j (--json): write the default config file as json.
 
 ## Including Examples in API Definition
 

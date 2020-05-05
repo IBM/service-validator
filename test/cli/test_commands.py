@@ -57,23 +57,17 @@ def test_run_with_all_args(cli, server_definition):
 
 
 def test_status_code_conformance_failure(cli, status_code_failure):
-    args: Iterable[str] = [
-        status_code_failure,
-        "--base-url=" + SERVER_URL,
-        "--hypothesis-phases=generate",
-    ]
-    result = cli.run(*args)
+    result = cli.run(
+        status_code_failure, "--base-url=" + SERVER_URL, "--hypothesis-phases=generate",
+    )
 
     assert result.exit_code == ExitCode.TESTS_FAILED
 
 
 def test_hooks_loaded(cli, server_definition):
-    args: Iterable[str] = [
-        server_definition,
-        "--base-url=" + SERVER_URL,
-        "--hypothesis-phases=generate",
-    ]
-    result = cli.run(*args)
+    result = cli.run(
+        server_definition, "--base-url=" + SERVER_URL, "--hypothesis-phases=generate",
+    )
 
     assert result.exit_code == ExitCode.OK
     # Makes sure handbook rule is loaded and included in output
@@ -83,3 +77,24 @@ def test_hooks_loaded(cli, server_definition):
             for line in result.stdout.split("Performed checks")[1].split("\n")
         ]
     )
+
+
+def test_init_with_all_args(cli, tmp_cwd):
+    """Tests init command. Creates default config in temp directory."""
+    result = cli.init("--json", "--overwrite")
+
+    assert result.exit_code == ExitCode.OK
+
+
+def test_commands_help(cli):
+    result = cli.main("--help")
+
+    lines = result.stdout.split("\n")
+    assert any(["Run a suite of tests." in line for line in lines])
+
+
+def test_commands_help_1(cli):
+    result = cli.main("--help")
+
+    lines = result.stdout.split("\n")
+    assert any(["Create a default config file." in line for line in lines])

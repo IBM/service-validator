@@ -12,14 +12,19 @@ from schemathesis import checks as checks_module
 from schemathesis.models import Case
 from requests.models import Response
 
-from ibm_service_validator.cli.process_config import process_config_file
 from ibm_service_validator.validation_hooks import HANDBOOK_RULES
+from .process_config import create_default_config, process_config_file
 
 ALL_CHECKS: tuple = checks_module.ALL_CHECKS + HANDBOOK_RULES
 DEFAULT_WORKERS: int = 1
 
 
-@click.command()
+@click.group()
+def ibm_service_validator() -> None:
+    pass
+
+
+@ibm_service_validator.command(short_help="Run a suite of tests.")
 @click.argument("schema", type=str, callback=callbacks.validate_schema)
 @click.option(
     "--auth",
@@ -186,3 +191,24 @@ def get_selected_checks(
     checks_off: Iterable[str],
 ) -> Iterable[Callable[[Response, Case], None]]:
     return tuple(check for check in ALL_CHECKS if check.__name__ not in checks_off)
+
+
+@ibm_service_validator.command(short_help="Create a default config file.")
+@click.option(
+    "--overwrite",
+    "-o",
+    "overwrite",
+    is_flag=True,
+    default=False,
+    help="Overwrite an existing config file with the default config.",
+)
+@click.option(
+    "--json",
+    "-j",
+    "write_json",
+    is_flag=True,
+    default=False,
+    help="Overwrite an existing config file with the default config.",
+)
+def init(write_json: bool, overwrite: bool) -> None:
+    create_default_config(write_json, overwrite)

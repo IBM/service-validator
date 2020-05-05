@@ -13,7 +13,7 @@ setup(
     install_requires=["click", "pyyaml", "schemathesis"],
     entry_points="""
         [console_scripts]
-        ibm-service-validator=ibm_service_validator.cli.commands:run
+        ibm-service-validator=ibm_service_validator.cli.commands:ibm_service_validator
     """,
     classifiers=[
         "Programming Language :: Python :: 3",

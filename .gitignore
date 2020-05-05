@@ -19,7 +19,7 @@ __pycache__
 
 build
 dist
-schemathesis_ibm.egg-info
+ibm_service_validator.egg-info
 
 # --- Service Validator Config --- #
 
