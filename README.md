@@ -11,7 +11,7 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 ## Install
 
 1. Find the version of the endpoint validator you want to use in the [releases](https://github.ibm.com/CloudEngineering/ibm-service-validator/releases) tab.
-2. Download the corresponding .whl (recommended) or .tar.gz file.
+2. In your current working directory, download the corresponding .whl (recommended) or .tar.gz file.
 3. `pip install ibm_service_validator-<version>.whl` or `pip install ibm_service_validator-<version>.tar.gz`
 
 ## Use
