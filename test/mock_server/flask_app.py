@@ -76,3 +76,7 @@ def find_port() -> int:
         s.bind(("", 0))  # selects an available port and binds to it
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+
+
+if __name__ == "__main__":
+    run_server_as_child(create_app(), 5000)

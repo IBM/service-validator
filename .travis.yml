@@ -21,13 +21,25 @@ jobs:
       install:
         - pip install pre-commit
         - pip install tox
+        - pip install flask
       script:
         - pre-commit run --all-files
         - tox -e py37
-
-      before_deploy:
+        # packages the project and saves the names of the files into file_arr
         - python3 -m pip install setuptools wheel
         - python3 setup.py sdist bdist_wheel
+        - file_arr=($(ls dist/))
+        # installs our packaged tool
+        - pip install dist/${file_arr[0]}
+        # sets the Travis-CI shell width because Schemathesis needs a value for shell width
+        - stty cols 80
+        # starts test server and runs our tool against the server
+        - python3 test/mock_server/flask_app.py &
+          ibm-service-validator run
+          test/mock_definitions/mock_server.yaml
+          -b http://localhost:5000
+          --hypothesis-phases=generate
+
       deploy:
         provider: releases
         api_key: $GH_TOKEN
