@@ -5,6 +5,7 @@ import hypothesis
 
 from schemathesis.cli.options import CSVOption, OptionalInt, NotSet
 from schemathesis.cli import callbacks, execute
+from schemathesis.cli import replay as _replay
 from schemathesis import loaders, runner
 
 from schemathesis.types import Filter
@@ -125,6 +126,11 @@ def ibm_service_validator() -> None:
     help="Show full tracebacks for internal errors.",
 )
 @click.option(
+    "--store-request-log",
+    help="Store requests and responses into a file.",
+    type=click.File("w"),
+)
+@click.option(
     "--tag",
     "-T",
     "tags",
@@ -150,6 +156,7 @@ def run(  # pylint: disable=too-many-arguments
     methods: Optional[Filter] = None,
     request_timeout: Optional[int] = None,
     show_errors_tracebacks: bool = False,
+    store_request_log: Optional[click.utils.LazyFile] = None,
     tags: Optional[Filter] = None,
 ) -> None:
     # pylint: disable=too-many-locals
@@ -173,6 +180,7 @@ def run(  # pylint: disable=too-many-arguments
         method=methods,
         request_timeout=request_timeout,
         seed=hypothesis_seed,
+        store_interactions=store_request_log is not None,
         tag=tags,
         validate_schema=True,
         workers_num=DEFAULT_WORKERS,
@@ -184,7 +192,9 @@ def run(  # pylint: disable=too-many-arguments
         hypothesis_suppress_health_check=None,
         hypothesis_verbosity=hypothesis_verbosity,
     )
-    execute(prepared_runner, DEFAULT_WORKERS, show_errors_tracebacks, None, None)
+    execute(
+        prepared_runner, DEFAULT_WORKERS, show_errors_tracebacks, store_request_log, None
+    )
 
 
 def get_selected_checks(
@@ -212,3 +222,28 @@ def get_selected_checks(
 )
 def init(write_json: bool, overwrite: bool) -> None:
     create_default_config(write_json, overwrite)
+
+
+@ibm_service_validator.command(short_help="Replay requests from a saved request log.")
+@click.argument("cassette_path", type=click.Path(exists=True))
+@click.option("--id", "id_", help="ID of request to replay.", type=str)
+@click.option(
+    "--status", help="Status (ERROR, FAILURE, SUCCESS) of requests to replay.", type=str
+)
+@click.option(
+    "--uri", help="A regexp that filters requests by their request URI.", type=str
+)
+@click.option(
+    "--method", help="A regexp that filters requests by their request method.", type=str,
+)
+@click.pass_context
+def replay(  # pylint: disable=too-many-arguments
+    context: click.Context,
+    cassette_path: str,
+    id_: Optional[str],
+    status: Optional[str],
+    uri: Optional[str],
+    method: Optional[str],
+) -> None:
+    # pylint: disable=too-many-locals
+    context.forward(_replay)

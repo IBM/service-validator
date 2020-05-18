@@ -98,3 +98,80 @@ def test_commands_help_1(cli):
 
     lines = result.stdout.split("\n")
     assert any(["Create a default config file." in line for line in lines])
+
+
+def test_replay(tmp_cwd, cli, server_definition):
+    """Tests cassettes and replay feature with basic args."""
+
+    # runs test suite and creates cassette in tmp_cwd
+    log_file = "log.yaml"
+    result = cli.run(
+        server_definition,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=explicit,generate",
+        "--store-request-log=" + log_file,
+    )
+    assert result.exit_code == ExitCode.OK
+
+    replay_result = cli.replay(log_file)
+
+    assert replay_result.exit_code == ExitCode.OK
+    lines = replay_result.stdout.split("\n")
+    assert any(["New status code" in line for line in lines])
+
+
+def test_replay_with_args(tmp_cwd, cli, server_definition):
+    """Tests cassettes and replay feature with basic args."""
+
+    # runs test suite and creates cassette in tmp_cwd
+    log_file = "log.yaml"
+    result = cli.run(
+        server_definition,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=explicit,generate",
+        "--store-request-log=" + log_file,
+    )
+    assert result.exit_code == ExitCode.OK
+
+    replay_result = cli.replay(log_file, "--id=1")
+    assert replay_result.exit_code == ExitCode.OK
+    lines = replay_result.stdout.split("\n")
+    assert any(["New status code" in line for line in lines])
+
+
+def test_replay_with_args_1(tmp_cwd, cli, server_definition):
+    """Tests cassettes and replay feature with basic args."""
+
+    # runs test suite and creates cassette in tmp_cwd
+    log_file = "log.yaml"
+    result = cli.run(
+        server_definition,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=explicit,generate",
+        "--store-request-log=" + log_file,
+    )
+    assert result.exit_code == ExitCode.OK
+
+    replay_result = cli.replay(log_file, "--uri=/allof")
+    assert replay_result.exit_code == ExitCode.OK
+    lines = replay_result.stdout.split("\n")
+    assert any(["New status code" in line for line in lines])
+
+
+def test_replay_with_args_2(tmp_cwd, cli, server_definition):
+    """Tests cassettes and replay feature with basic args."""
+
+    # runs test suite and creates cassette in tmp_cwd
+    log_file = "log.yaml"
+    result = cli.run(
+        server_definition,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=explicit,generate",
+        "--store-request-log=" + log_file,
+    )
+    assert result.exit_code == ExitCode.OK
+
+    replay_result = cli.replay(log_file, "--status=SUCCESS", "--method=GET")
+    assert replay_result.exit_code == ExitCode.OK
+    lines = replay_result.stdout.split("\n")
+    assert any(["New status code" in line for line in lines])

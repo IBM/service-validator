@@ -31,6 +31,10 @@ def cli():
             return cli_runner.invoke(commands.init, args, **kwargs)
 
         @staticmethod
+        def replay(*args, **kwargs):
+            return cli_runner.invoke(commands.replay, args, **kwargs)
+
+        @staticmethod
         def main(*args, **kwargs):
             return cli_runner.invoke(commands.ibm_service_validator, args, **kwargs)
 

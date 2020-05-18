@@ -16,18 +16,21 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 
 ## Use
 
-### Command line
+### Run
+
+The `run` command runs a suite of tests against the service using an API definition.
 
     ibm-service-validator run <path API definition> --base-url <base URL of API> [options]
 
-#### run [options]
+#### run options
 
 - -a (--auth): provide server username and password in the form `username:password`.
 - -A (--auth-type): authentication mechanism. May be "basic" or "digest" (default is "basic").
 - -b (--base-url): base url of the service to be tested.
 - -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
-- -x (--exitfirst): exit and report on the first error or test failure.
-- --show-errors-tracebacks: show error tracebacks for internal errors.
+- -x (--exitfirst): flag to exit and report on the first error or test failure.
+- --show-errors-tracebacks: flag to show error tracebacks for internal errors.
+- --store-request-log: name of yaml file in which to store logs of requests made during testing. Example: `--store-request-log=logs.yaml`.
 - --hypothesis-deadline: number of milliseconds allowed for the server to respond (default is 500). Example: `--hypothesis-deadline=300`.
 - --hypothesis-phases: determines how test data will be generated. **The default value, `explicit`, indicates test data will only be generated from examples in the OpenAPI definition.** Example: `--hypothesis-deadline=explicit,generate` will use explicit OpenAPI examples and generate test data.
   - `explicit`: test data generated from examples. Recommended.
@@ -52,6 +55,24 @@ Options when generating test data from schema definitions (test data comes from 
 - --hypothesis-derandomize: this flag is used to generate test data deterministically instead of generating random, valid test data.
 - --hypothesis-max-examples: this value determines the maximum number of tests to generate for each method. Example: `--hypothesis-max-examples=50`.
 - --hypothesis-seed: provide a seed from which random test data will be generated.
+
+### Replay
+
+The `replay` command runs a snapshot of tests and compares new results to the original results. This command takes a file with logs from a previous run of tests.
+
+    ibm-service-validator replay path/to/logs.yaml [options]
+
+Note: To capture these logs, run the service validator with the `--store-request-log` option.
+
+#### replay options
+
+- --id: run a specific request by providing the request id (`--id 1`).
+- --status: run only the requests with a specific status code (`--status SUCCESS`).
+  - SUCCESS
+  - ERROR
+  - FAILURE
+- --uri: run the requests that contain the given uri (`--uri path1/resources`)
+- --method: run only the requests that use the given HTTP method (`--method GET`)
 
 ## Configuration
 
