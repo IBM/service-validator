@@ -8,7 +8,7 @@ from .mock_server import flask_app
 from src.ibm_service_validator.cli import commands
 
 from requests.models import Response, PreparedRequest
-from schemathesis.models import Case, Endpoint
+from schemathesis.models import Case, Endpoint, EndpointDefinition
 
 from src.ibm_service_validator.cli.process_config import (
     HANDBOOK_CONFIG_NAME,
@@ -63,6 +63,48 @@ def config_object():
 
 
 @pytest.fixture()
+def config_warn_object():
+    return {
+        HANDBOOK_CONFIG_NAME: {
+            "allow_header_in_405": "warn",
+            "default_response_content_type": "warn",
+            "location_201": "warn",
+            "no_422": "warn",
+            "no_accept_header": "warn",
+            "no_content_204": "warn",
+            "www_authenticate_401": "warn",
+        },
+        SCHEMATHESIS_CONFIG_NAME: {
+            "not_a_server_error": "warn",
+            "status_code_conformance": "warn",
+            "content_type_conformance": "warn",
+            "response_schema_conformance": "warn",
+        },
+    }
+
+
+@pytest.fixture()
+def config_partial_warn():
+    return {
+        HANDBOOK_CONFIG_NAME: {
+            "allow_header_in_405": "on",
+            "default_response_content_type": "on",
+            "location_201": "on",
+            "no_422": "on",
+            "no_accept_header": "on",
+            "no_content_204": "on",
+            "www_authenticate_401": "on",
+        },
+        SCHEMATHESIS_CONFIG_NAME: {
+            "not_a_server_error": "on",
+            "status_code_conformance": "warn",
+            "content_type_conformance": "warn",
+            "response_schema_conformance": "warn",
+        },
+    }
+
+
+@pytest.fixture()
 def create_endpoint():
     def f(
         path=None,
@@ -81,7 +123,7 @@ def create_endpoint():
         return Endpoint(
             path,
             method,
-            definition,
+            EndpointDefinition(raw=definition, scope="global"),
             schema,
             app,
             base_url,
@@ -97,6 +139,14 @@ def create_endpoint():
 
 
 @pytest.fixture()
+def mixed_api_def() -> str:
+    """Return path to API definition that causes status code conformance failure."""
+
+    dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(dir, "mock_definitions", "mixed.yaml")
+
+
+@pytest.fixture()
 def mock_case():
     return Case("http://mockapi.com")
 
@@ -104,18 +154,6 @@ def mock_case():
 @pytest.fixture()
 def mock_response():
     return Response()
-
-
-@pytest.fixture()
-def write_to_file():
-    def f(
-        file_name: str, config: Dict[str, Any], dump: Callable[[Any, IO], None]
-    ) -> None:
-        config_file = open(file_name, "a+")
-        dump(config, config_file)
-        config_file.close()
-
-    return f
 
 
 @pytest.fixture()
@@ -172,3 +210,15 @@ def tmp_cwd(tmp_path):
     """Set the cwd to a temporary path. Return path."""
     os.chdir(tmp_path)
     return tmp_path
+
+
+@pytest.fixture()
+def write_to_file():
+    def f(
+        file_name: str, config: Dict[str, Any], dump: Callable[[Any, IO], None]
+    ) -> None:
+        config_file = open(file_name, "a+")
+        dump(config, config_file)
+        config_file.close()
+
+    return f

@@ -1,18 +1,24 @@
-from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Callable, Dict, FrozenSet, Iterable, List, Optional, Tuple, Union
 
 import click
 import hypothesis
 
+from requests.models import Response
+from schemathesis.cli.context import ExecutionContext
+from schemathesis.cli.handlers import EventHandler
+from schemathesis.cli.output.default import DefaultOutputStyleHandler
+from schemathesis.cli.output.short import ShortOutputStyleHandler
 from schemathesis.cli.options import CSVOption, OptionalInt, NotSet
 from schemathesis.cli import callbacks, execute
 from schemathesis.cli import replay as _replay
 from schemathesis import loaders, runner
 
+from schemathesis.hooks import GLOBAL_HOOK_DISPATCHER, HookContext
 from schemathesis.types import Filter
 from schemathesis import checks as checks_module
 from schemathesis.models import Case
-from requests.models import Response
 
+from ibm_service_validator.cli.handlers.output_handler import OutputHandler
 from ibm_service_validator.validation_hooks import HANDBOOK_RULES
 from .process_config import create_default_config, process_config_file
 
@@ -161,9 +167,10 @@ def run(  # pylint: disable=too-many-arguments
 ) -> None:
     # pylint: disable=too-many-locals
 
-    checks_off = process_config_file()
+    off, warnings = process_config_file()
 
-    selected_checks = get_selected_checks(checks_off)
+    selected_checks = get_selected_checks(off)
+    register_output_handler(warnings)
 
     # Invoke Schemathesis
     prepared_runner = runner.prepare(
@@ -198,9 +205,28 @@ def run(  # pylint: disable=too-many-arguments
 
 
 def get_selected_checks(
-    checks_off: Iterable[str],
+    off: Iterable[str],
 ) -> Iterable[Callable[[Response, Case], None]]:
-    return tuple(check for check in ALL_CHECKS if check.__name__ not in checks_off)
+    return tuple(check for check in ALL_CHECKS if check.__name__ not in off)
+
+
+def register_output_handler(warnings: FrozenSet[str]) -> None:
+    def after_init_cli_run_handlers(
+        context: HookContext,
+        handlers: List[EventHandler],
+        execution_context: ExecutionContext,
+    ) -> None:
+        # filters out the Schemathesis output handlers and adds OutputHandler
+        handlers[:] = [
+            *filter(
+                lambda handler: not isinstance(handler, DefaultOutputStyleHandler)
+                and not isinstance(handler, ShortOutputStyleHandler),
+                handlers,
+            ),
+            OutputHandler(warnings),
+        ]
+
+    GLOBAL_HOOK_DISPATCHER.register(after_init_cli_run_handlers)
 
 
 @ibm_service_validator.command(short_help="Create a default config file.")

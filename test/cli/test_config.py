@@ -22,11 +22,11 @@ def test_process_config_file(tmp_cwd, config_object, write_to_file):
     # create a config file in the temp cwd
     write_to_file(CONFIG_FILE_NAME + ".yaml", config_object, yaml.safe_dump)
 
-    checks_turned_off = process_config_file()
+    off, warnings = process_config_file()
 
     assert all(
         [
-            rule in checks_turned_off
+            rule in off
             for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
             if val == "off" or val == False
         ]
@@ -37,11 +37,11 @@ def test_process_config_file_1(tmp_cwd, config_object, write_to_file):
     # create a config file in the temp cwd
     write_to_file(CONFIG_FILE_NAME + ".yml", config_object, yaml.safe_dump)
 
-    checks_turned_off = process_config_file()
+    off, warnings = process_config_file()
 
     assert all(
         [
-            rule in checks_turned_off
+            rule in off
             for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
             if val == "off" or val == False
         ]
@@ -52,11 +52,11 @@ def test_process_config_file_2(tmp_cwd, config_object, write_to_file):
     # create a config file in the temp cwd
     write_to_file(CONFIG_FILE_NAME + ".json", config_object, json.dump)
 
-    checks_turned_off = process_config_file()
+    off, warnings = process_config_file()
 
     assert all(
         [
-            rule in checks_turned_off
+            rule in off
             for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
             if val == "off" or val == False
         ]
@@ -66,7 +66,24 @@ def test_process_config_file_2(tmp_cwd, config_object, write_to_file):
 def test_process_config_file_3(tmp_cwd):
     """Ensure we receive an empty set when no config file is present."""
     # did not create a config file
-    assert not process_config_file()
+    off, warnings = process_config_file()
+    assert not off
+    assert not warnings
+
+
+def test_process_config_file_4(tmp_cwd, config_warn_object, write_to_file):
+    """Ensure we receive an empty set when no config file is present."""
+    # did not create a config file
+    write_to_file(CONFIG_FILE_NAME + ".json", config_warn_object, json.dump)
+    off, warnings = process_config_file()
+
+    assert all(
+        [
+            rule in warnings
+            for rule, val in config_warn_object[HANDBOOK_CONFIG_NAME].items()
+            if val == "warn"
+        ]
+    )
 
 
 def test_load_config_file_as_dict(tmp_cwd, config_object, write_to_file):

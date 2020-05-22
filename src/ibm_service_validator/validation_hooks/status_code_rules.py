@@ -3,7 +3,7 @@ from schemathesis.models import Case
 
 
 def default_response_content_type(response: Response, case: Case) -> None:
-    api_def = case.endpoint.definition
+    api_def = case.endpoint.definition.raw
     request = response.request
     request_headers = request.headers
     request_body_content_type = (

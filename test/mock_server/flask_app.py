@@ -45,6 +45,11 @@ def create_app() -> Flask:
         data = {"foo": "string"}
         return jsonify(data), 400
 
+    @app.route("/server_error", methods=["GET"])
+    def server_error():
+        data = {"foo": "string"}
+        return jsonify(data), 500
+
     return app
 
 

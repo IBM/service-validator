@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, IO, Iterable
+from typing import Any, Callable, Dict, FrozenSet, IO, Iterable, Tuple
 
 import os
 import json
@@ -10,7 +10,7 @@ SCHEMATHESIS_CONFIG_NAME: str = "schemathesis_checks"
 DEFAULT_CONFIG: Dict[str, Dict[str, str]] = {
     HANDBOOK_CONFIG_NAME: {
         "allow_header_in_405": "on",
-        "invalid_request_content_type": "on",
+        "default_response_content_type": "on",
         "location_201": "on",
         "no_422": "on",
         "no_accept_header": "on",
@@ -26,13 +26,13 @@ DEFAULT_CONFIG: Dict[str, Dict[str, str]] = {
 }
 
 
-def process_config_file() -> Iterable[str]:
+def process_config_file() -> Tuple[FrozenSet[str], FrozenSet[str]]:
     config = load_config_file_as_dict(os.getcwd())
 
     if not config:
-        return set()
+        return frozenset(), frozenset()
 
-    return checks_off(config)
+    return checks_off(config), warnings(config)
 
 
 def load_config_file_as_dict(dir: str) -> Dict[str, Any]:
@@ -54,25 +54,37 @@ def load_config_file_as_dict(dir: str) -> Dict[str, Any]:
         return load_config_file_as_dict(dir.rsplit("/", 1)[0])
 
 
-def checks_off(config: Dict[str, Any]) -> Iterable[str]:
+def checks_off(config: Dict[str, Any]) -> FrozenSet[str]:
     """Returns set of all checks configured to off."""
 
-    handbook_rules = (
-        config[HANDBOOK_CONFIG_NAME] if HANDBOOK_CONFIG_NAME in config else None
+    # YAML treats unquoted off as implicit boolean. Hence, we check "not x".
+    is_off = lambda x: x == "off" or not x
+    return frozenset(
+        {
+            *_get_checks(config.get(HANDBOOK_CONFIG_NAME), is_off),
+            *_get_checks(config.get(SCHEMATHESIS_CONFIG_NAME), is_off),
+        }
     )
-    schemathesis_rules = (
-        config[SCHEMATHESIS_CONFIG_NAME] if SCHEMATHESIS_CONFIG_NAME in config else None
+
+
+def warnings(config: Dict[str, Any]) -> FrozenSet[str]:
+    """Returns set of all warnings."""
+
+    is_warning = lambda x: x == "warn"
+    return frozenset(
+        {
+            *_get_checks(config.get(HANDBOOK_CONFIG_NAME), is_warning),
+            *_get_checks(config.get(SCHEMATHESIS_CONFIG_NAME), is_warning),
+        }
     )
 
-    return {*_checks_off(handbook_rules), *_checks_off(schemathesis_rules)}
 
-
-def _checks_off(config: Any) -> Iterable[str]:
+def _get_checks(config: Any, condition: Callable[[Any], bool]) -> Iterable[str]:
     if not config or not isinstance(config, dict):
-        return set()
+        return ()
 
     # YAML treats unquoted off as implicit boolean. Hence, we check "not val".
-    return {rule for rule, val in config.items() if val == "off" or not val}
+    return (rule for rule, val in config.items() if condition(val))
 
 
 def create_default_config(write_json: bool, overwrite: bool) -> None:

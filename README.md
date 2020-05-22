@@ -82,21 +82,21 @@ Rules may be configured using a `ibm-service-validator-config.yaml` or `ibm-serv
 
 We look for a configuration file in the current working directory from which the service validator is invoked, and we search up the directory until we find the first matching config file. It is recommended to create this configuration file in the root directory of your project.
 
-Rules may be on or off. An example of the configuration file is given below:
+Rules may be on, off, or warn. An example of the configuration file is given below:
 
     ibm_cloud_api_handbook:
-        allow_header_in_405: 'off'
-        default_response_content_type: 'off'
-        location_201: 'off'
+        allow_header_in_405: 'on'
+        default_response_content_type: 'on'
+        location_201: 'warn'
         no_422: 'off'
-        no_accept_header: 'off'
-        no_content_204: 'off'
-        www_authenticate_401: 'off'
+        no_accept_header: 'warn'
+        no_content_204: 'on'
+        www_authenticate_401: 'warn'
     schemathesis_checks:
-        not_a_server_error: 'off'
-        status_code_conformance: 'off'
-        content_type_conformance: 'off'
-        response_schema_conformance: 'off'
+        not_a_server_error: 'on'
+        status_code_conformance: 'warn'
+        content_type_conformance: 'warn'
+        response_schema_conformance: 'on'
 
 ### Create Default Configuration File
 
