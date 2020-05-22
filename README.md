@@ -20,13 +20,25 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 
 The `run` command runs a suite of tests against the service using an API definition.
 
-    ibm-service-validator run <path API definition> --base-url <base URL of API> [options]
+    ibm-service-validator [env] run <path API definition> --base-url <base URL of API> [options]
+
+#### [env]
+
+The following options may be used to set environment variables used to obtain a bearer token when --with-bearer used:
+
+- --set-api-key: set the IBM_CLOUD_SERVICE_VALIDATOR_API_KEY environment variable to the API key needed to obtain a bearer token.
+- --set-iam-endpoint: set the IBM_CLOUD_SERVICE_VALIDATOR_IAM_ENDPOINT to the URL of the API at which the bearer token may be obtained.
+
+Example Usage:
+
+    ibm-service-validator --set-api-key=YOUR_API_KEY --set-iam-endpoint=https://iam.test.cloud.ibm.com/identity/token run path/to/schema -b https://api.com --with-bearer
 
 #### run options
 
 - -a (--auth): provide server username and password in the form `username:password`.
 - -A (--auth-type): authentication mechanism. May be "basic" or "digest" (default is "basic").
 - -b (--base-url): base url of the service to be tested.
+- -B (--with-bearer): obtains a bearer token and includes it in tests. Uses [environment variables](#[env]) to obtain the bearer token.
 - -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
 - -x (--exitfirst): flag to exit and report on the first error or test failure.
 - --show-errors-tracebacks: flag to show error tracebacks for internal errors.

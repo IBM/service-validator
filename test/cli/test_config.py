@@ -25,11 +25,9 @@ def test_process_config_file(tmp_cwd, config_object, write_to_file):
     off, warnings = process_config_file()
 
     assert all(
-        [
-            rule in off
-            for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
-            if val == "off" or val == False
-        ]
+        rule in off
+        for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
+        if val == "off" or val == False
     )
 
 
@@ -40,11 +38,9 @@ def test_process_config_file_1(tmp_cwd, config_object, write_to_file):
     off, warnings = process_config_file()
 
     assert all(
-        [
-            rule in off
-            for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
-            if val == "off" or val == False
-        ]
+        rule in off
+        for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
+        if val == "off" or val == False
     )
 
 
@@ -55,11 +51,9 @@ def test_process_config_file_2(tmp_cwd, config_object, write_to_file):
     off, warnings = process_config_file()
 
     assert all(
-        [
-            rule in off
-            for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
-            if val == "off" or val == False
-        ]
+        rule in off
+        for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
+        if val == "off" or val == False
     )
 
 
@@ -78,11 +72,9 @@ def test_process_config_file_4(tmp_cwd, config_warn_object, write_to_file):
     off, warnings = process_config_file()
 
     assert all(
-        [
-            rule in warnings
-            for rule, val in config_warn_object[HANDBOOK_CONFIG_NAME].items()
-            if val == "warn"
-        ]
+        rule in warnings
+        for rule, val in config_warn_object[HANDBOOK_CONFIG_NAME].items()
+        if val == "warn"
     )
 
 
@@ -129,11 +121,9 @@ def test_checks_off(config_object):
     checks_turned_off = checks_off(config_object)
 
     assert all(
-        [
-            rule in checks_turned_off
-            for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
-            if val == "off" or val == False
-        ]
+        rule in checks_turned_off
+        for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
+        if val == "off" or val == False
     )
 
 
@@ -144,11 +134,9 @@ def test_checks_off_1(config_object):
         **config_object[HANDBOOK_CONFIG_NAME], **config_object[SCHEMATHESIS_CONFIG_NAME]
     )
     assert all(
-        [
-            rule in checks_turned_off
-            for rule, val in all_config_rules.items()
-            if val == "off" or val == False
-        ]
+        rule in checks_turned_off
+        for rule, val in all_config_rules.items()
+        if val == "off" or val == False
     )
 
 

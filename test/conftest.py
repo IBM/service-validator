@@ -157,6 +157,14 @@ def mock_response():
 
 
 @pytest.fixture()
+def need_authorization() -> str:
+    """Return path of the mock server API definition."""
+
+    dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(dir, "mock_definitions", "need_authorization.yaml")
+
+
+@pytest.fixture()
 def prepare_request():
     def f(
         method="GET",

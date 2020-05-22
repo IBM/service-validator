@@ -1,3 +1,4 @@
+import os
 import pytest
 from _pytest.main import ExitCode
 
@@ -5,6 +6,7 @@ import yaml
 
 from ..mock_server import flask_app
 from multiprocessing import Process
+from src.ibm_service_validator.cli.commands import API_KEY, IAM_ENDPOINT
 
 from schemathesis.hooks import unregister_all
 from src.ibm_service_validator.cli.process_config import CONFIG_FILE_NAME
@@ -101,15 +103,17 @@ def test_commands_help(cli):
     result = cli.main("--help")
 
     lines = result.stdout.split("\n")
-    assert any(["Run a suite of tests." in line for line in lines])
+    assert any("Run a suite of tests." in line for line in lines)
+    assert any("Create a default config file." in line for line in lines)
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_commands_help_1(cli):
+def test_main(cli):
     result = cli.main("--help")
+    assert result.exit_code == ExitCode.OK
 
     lines = result.stdout.split("\n")
-    assert any(["Create a default config file." in line for line in lines])
+    assert any("Create a default config file." in line for line in lines)
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -130,7 +134,7 @@ def test_replay(tmp_cwd, cli, server_definition):
 
     assert replay_result.exit_code == ExitCode.OK
     lines = replay_result.stdout.split("\n")
-    assert any(["New status code" in line for line in lines])
+    assert any("New status code" in line for line in lines)
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -150,7 +154,7 @@ def test_replay_with_args(tmp_cwd, cli, server_definition):
     replay_result = cli.replay(log_file, "--id=1")
     assert replay_result.exit_code == ExitCode.OK
     lines = replay_result.stdout.split("\n")
-    assert any(["New status code" in line for line in lines])
+    assert any("New status code" in line for line in lines)
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -170,7 +174,7 @@ def test_replay_with_args_1(tmp_cwd, cli, server_definition):
     replay_result = cli.replay(log_file, "--uri=/allof")
     assert replay_result.exit_code == ExitCode.OK
     lines = replay_result.stdout.split("\n")
-    assert any(["New status code" in line for line in lines])
+    assert any("New status code" in line for line in lines)
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -190,7 +194,7 @@ def test_replay_with_args_2(tmp_cwd, cli, server_definition):
     replay_result = cli.replay(log_file, "--status=SUCCESS", "--method=GET")
     assert replay_result.exit_code == ExitCode.OK
     lines = replay_result.stdout.split("\n")
-    assert any(["New status code" in line for line in lines])
+    assert any("New status code" in line for line in lines)
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -237,6 +241,59 @@ def test_warning_output_1(
     assert any("Performed checks:" in line for line in lines)
     assert any("== WARNINGS ==" in line for line in lines)
     assert any("== FAILURES ==" in line for line in lines)
+
+
+@pytest.mark.usefixtures("reset_hooks")
+def test_bearer_token(cli, need_authorization):
+    iam_endpoint = os.path.join(SERVER_URL, "token")
+    result = cli.main(
+        "--set-api-key=" + flask_app.VALID_API_KEY,
+        "--set-iam-endpoint=" + iam_endpoint,
+        "run",
+        need_authorization,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=generate",
+        "--with-bearer",
+    )
+
+    assert result.exit_code == ExitCode.OK
+
+
+@pytest.mark.usefixtures("reset_hooks")
+def test_bearer_token_1(cli, need_authorization):
+    iam_endpoint = os.path.join(SERVER_URL, "token")
+    result = cli.main(
+        "--set-api-key=" + flask_app.VALID_API_KEY,
+        "--set-iam-endpoint=" + iam_endpoint,
+        "run",
+        need_authorization,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=generate",
+        "--header=Authorization:aslkdavlkndfkadfkasldfk",
+        "--with-bearer",
+    )
+
+    assert result.exit_code == ExitCode.INTERRUPTED
+
+
+@pytest.mark.usefixtures("reset_hooks")
+def test_bearer_token_2(cli, need_authorization):
+    """Tests usage error is raised when missing API_KEY and IAM_ENDPOINT env vars."""
+
+    # ensure the environment variables are not present
+    del os.environ[API_KEY]
+    del os.environ[IAM_ENDPOINT]
+
+    iam_endpoint = os.path.join(SERVER_URL, "token")
+    result = cli.main(
+        "run",
+        need_authorization,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=generate",
+        "--with-bearer",
+    )
+
+    assert result.exit_code == ExitCode.INTERRUPTED
 
 
 @pytest.fixture

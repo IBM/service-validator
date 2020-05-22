@@ -1,7 +1,9 @@
 from typing import Callable, Dict, FrozenSet, Iterable, List, Optional, Tuple, Union
+import os
 
 import click
 import hypothesis
+from ibm_cloud_sdk_core.authenticators.iam_authenticator import IAMAuthenticator
 
 from requests.models import Response
 from schemathesis.cli.context import ExecutionContext
@@ -20,15 +22,35 @@ from schemathesis.models import Case
 
 from ibm_service_validator.cli.handlers.output_handler import OutputHandler
 from ibm_service_validator.validation_hooks import HANDBOOK_RULES
-from .process_config import create_default_config, process_config_file
+from ibm_service_validator.cli.process_config import (
+    create_default_config,
+    process_config_file,
+)
 
 ALL_CHECKS: tuple = checks_module.ALL_CHECKS + HANDBOOK_RULES
+API_KEY = "IBM_CLOUD_SERVICE_VALIDATOR_API_KEY"
+IAM_ENDPOINT = "IBM_CLOUD_SERVICE_VALIDATOR_IAM_ENDPOINT"
 DEFAULT_WORKERS: int = 1
 
 
 @click.group()
-def ibm_service_validator() -> None:
-    pass
+@click.option(
+    "--set-api-key", "api_key", type=str, help="Set API key as an environment variable."
+)
+@click.option(
+    "--set-iam-endpoint",
+    "iam_endpoint",
+    type=str,
+    help="Set the IAM endpoint as an environment variable.",
+)
+def ibm_service_validator(api_key: str = str(), iam_endpoint: str = str()) -> None:
+    set_environment_variable(api_key, API_KEY)
+    set_environment_variable(iam_endpoint, IAM_ENDPOINT)
+
+
+def set_environment_variable(val: str, env_var_name: str) -> None:
+    if val:
+        os.environ[env_var_name] = val
 
 
 @ibm_service_validator.command(short_help="Run a suite of tests.")
@@ -145,6 +167,9 @@ def ibm_service_validator() -> None:
     callback=callbacks.validate_regex,
     help="Filter schemathesis test by schema tag pattern.",
 )
+@click.option(
+    "--with-bearer", "-B", is_flag=True, help="Flag to send bearer token with requests."
+)
 def run(  # pylint: disable=too-many-arguments
     schema: str,
     auth: Optional[Tuple[str, str]],
@@ -164,10 +189,21 @@ def run(  # pylint: disable=too-many-arguments
     show_errors_tracebacks: bool = False,
     store_request_log: Optional[click.utils.LazyFile] = None,
     tags: Optional[Filter] = None,
+    with_bearer: bool = False,
 ) -> None:
     # pylint: disable=too-many-locals
 
     off, warnings = process_config_file()
+
+    if with_bearer:
+        if "Authorization" not in headers and "authorization" not in headers:
+            headers["Authorization"] = get_bearer_token()
+        else:
+            raise click.UsageError(
+                "--with-bearer flag used but Authorization header provided with --header."
+            )
+
+    checks_off = process_config_file()
 
     selected_checks = get_selected_checks(off)
     register_output_handler(warnings)
@@ -227,6 +263,21 @@ def register_output_handler(warnings: FrozenSet[str]) -> None:
         ]
 
     GLOBAL_HOOK_DISPATCHER.register(after_init_cli_run_handlers)
+
+
+def get_bearer_token() -> str:
+    if API_KEY not in os.environ or IAM_ENDPOINT not in os.environ:
+        raise click.UsageError(
+            f"Must set {API_KEY} and {IAM_ENDPOINT} environment variables to use --with-bearer."
+        )
+
+    try:
+        bearer_token = IAMAuthenticator(
+            os.environ[API_KEY], url=os.environ[IAM_ENDPOINT]
+        ).token_manager.get_token()
+        return "Bearer {0}".format(bearer_token)
+    except Exception as e:
+        raise RuntimeError("Problem getting bearer token.") from e
 
 
 @ibm_service_validator.command(short_help="Create a default config file.")

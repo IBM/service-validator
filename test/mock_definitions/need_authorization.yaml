@@ -5,7 +5,7 @@ info:
   title: Example service
   version: 1.0.0
 paths:
-  /status_code_conformance_failure:
+  /need_authorization:
     get:
       tags:
         - test_tag

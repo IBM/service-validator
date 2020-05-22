@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ibm-service-validator"
-version = "0.0.1"
+version = "0.0.3"
 description = "Extension of endpoint validator, Schemathesis."
 packages = [
     { include = "src" }
@@ -23,9 +23,11 @@ readme = "README.md"
 repository = "https://github.ibm.com/CloudEngineering/ibm-service-validator"
 
 [tool.poetry.dependencies]
-python = "^3.6"
-schemathesis = "^1.3"
 click = "^7.0"
+ibm-cloud-sdk-core = "^2.0"
+python = "^3.6"
+pyyaml = "^5.3"
+schemathesis = "^1.3"
 
 [tool.poetry.dev-dependencies]
 coverage = "^4.5"
@@ -44,7 +46,7 @@ multi_line_output = 3
 default_section = "THIRDPARTY"
 include_trailing_comma = true
 known_first_party = "ibm_service_validator"
-known_third_party = ["_pytest", "click", "flask", "hypothesis", "ibm_service_validator", "pytest", "requests", "schemathesis", "setuptools", "yaml"]
+known_third_party = ["_pytest", "click", "flask", "hypothesis", "ibm_cloud_sdk_core", "ibm_service_validator", "pytest", "requests", "schemathesis", "setuptools", "yaml"]
 
 [build-system]
 requires = ["poetry>=0.12"]
