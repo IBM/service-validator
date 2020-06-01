@@ -39,6 +39,7 @@ jobs:
           test/mock_definitions/mock_server.yaml
           -b http://localhost:5000
           --hypothesis-phases=generate
+          --statistics
 
       deploy:
         provider: releases

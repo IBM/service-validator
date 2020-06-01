@@ -58,7 +58,8 @@ def test_run_with_all_args(cli, server_definition):
         "--hypothesis-verbosity=quiet",
         "--method=get",
         "--request-timeout=500",
-        "--show-errors-tracebacks",
+        "--show-exception-tracebacks",
+        "--statistics",
         "--tag=test_tag",
     )
 
@@ -216,7 +217,7 @@ def test_warning_output(
     assert result.exit_code == ExitCode.OK
     # gets non-empty lines
     lines = [*filter(lambda x: x, result.stdout.split("\n"))]
-    assert "2 warned in" in lines[-1]
+    assert "2 warnings in" in lines[-1]
     assert any("== WARNINGS ==" in line for line in lines)
     assert all("FAILURES" not in line for line in lines)  # no failures section
 
@@ -236,11 +237,54 @@ def test_warning_output_1(
     assert result.exit_code == ExitCode.TESTS_FAILED
     # gets non-empty lines
     lines = [*filter(lambda x: x, result.stdout.split("\n"))]
-    assert "71 passed, 4 warned, 2 failed in" in lines[-1]
+    assert "71 successes, 4 warnings, 2 errors in" in lines[-1]
     assert any("Warning checks:" in line for line in lines)
     assert any("Performed checks:" in line for line in lines)
     assert any("== WARNINGS ==" in line for line in lines)
-    assert any("== FAILURES ==" in line for line in lines)
+    assert any("== ERRORS ==" in line for line in lines)
+
+
+@pytest.mark.usefixtures("reset_hooks")
+def test_exceptions(tmp_cwd, cli, invalid_schema):
+    """Tests that EXCEPTIONS section created with InvalidSchema Exception."""
+
+    result = cli.main(
+        "run", invalid_schema, "--base-url=" + SERVER_URL, "--hypothesis-phases=generate",
+    )
+
+    assert result.exit_code == ExitCode.TESTS_FAILED
+    # gets non-empty lines
+    lines = [*filter(lambda x: x, result.stdout.split("\n"))]
+    assert any("GET /wont_be_called E" in line for line in lines)
+    assert any("== EXCEPTIONS ==" in line for line in lines)
+    assert not any("== ERRORS ==" in line for line in lines)
+    assert "2 exceptions" in lines[-1]
+
+
+@pytest.mark.usefixtures("reset_hooks")
+def test_statistics(tmp_cwd, cli, config_partial_warn, mixed_api_def, write_to_file):
+    """Tests statistics output."""
+
+    write_to_file(CONFIG_FILE_NAME + ".yaml", config_partial_warn, yaml.safe_dump)
+
+    result = cli.main(
+        "run",
+        mixed_api_def,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=generate",
+        "--statistics",
+    )
+
+    assert result.exit_code == ExitCode.TESTS_FAILED
+    # gets non-empty lines
+    lines = [*filter(lambda x: x, result.stdout.split("\n"))]
+    assert "== STATISTICS ==" in lines[-8]
+    assert lines[-7] == "Total warnings: 4"
+    assert lines[-6] == "Total errors: 2"
+    assert lines[-5] == "warnings"
+    assert lines[-4] == "status_code_conformance : 4"
+    assert lines[-3] == "errors"
+    assert lines[-2] == "not_a_server_error : 2"
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -261,6 +305,10 @@ def test_bearer_token(cli, need_authorization):
 
 @pytest.mark.usefixtures("reset_hooks")
 def test_bearer_token_1(cli, need_authorization):
+    """Authorization header provided and --with-bearer option used.
+
+    These should not be provided together.
+    """
     iam_endpoint = os.path.join(SERVER_URL, "token")
     result = cli.main(
         "--set-api-key=" + flask_app.VALID_API_KEY,
@@ -274,6 +322,9 @@ def test_bearer_token_1(cli, need_authorization):
     )
 
     assert result.exit_code == ExitCode.INTERRUPTED
+    # gets non-empty lines
+    lines = [*filter(lambda x: x, result.stdout.split("\n"))]
+    assert "--with-bearer flag used but Authorization" in lines[-1]
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -281,8 +332,10 @@ def test_bearer_token_2(cli, need_authorization):
     """Tests usage error is raised when missing API_KEY and IAM_ENDPOINT env vars."""
 
     # ensure the environment variables are not present
-    del os.environ[API_KEY]
-    del os.environ[IAM_ENDPOINT]
+    if API_KEY in os.environ:
+        del os.environ[API_KEY]
+    if IAM_ENDPOINT in os.environ:
+        del os.environ[IAM_ENDPOINT]
 
     iam_endpoint = os.path.join(SERVER_URL, "token")
     result = cli.main(
@@ -294,6 +347,9 @@ def test_bearer_token_2(cli, need_authorization):
     )
 
     assert result.exit_code == ExitCode.INTERRUPTED
+    # gets non-empty lines
+    lines = [*filter(lambda x: x, result.stdout.split("\n"))]
+    assert f"Must set {API_KEY}" in lines[-1]
 
 
 @pytest.fixture

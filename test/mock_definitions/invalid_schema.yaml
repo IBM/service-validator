@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  license:
+    name: MIT
+  title: Example service
+  version: 1.0.0
+paths:
+  /wont_be_called:
+    get:
+      tags:
+        - test_tag
+      summary: GET with a requestBody will produce InvalidSchema exception
+      operationId: get_string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringObj'
+          description: object successfully returned
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StringObj'
+  /wont_be_called_1:
+    get:
+      tags:
+        - test_tag
+      summary: GET with a requestBody will produce InvalidSchema exception
+      operationId: get_string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringObj'
+          description: object successfully returned
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StringObj'
+components:
+  schemas:
+    StringObj:
+      description: an object with string prop
+      properties:
+        foo:
+          type: string
+      type: object

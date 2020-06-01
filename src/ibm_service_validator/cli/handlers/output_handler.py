@@ -24,18 +24,51 @@ def handle_after_execution(
 
 
 def handle_finished(
-    context: ExecutionContext, event: events.Finished, warnings: FrozenSet[str]
+    context: ExecutionContext,
+    event: events.Finished,
+    warnings: FrozenSet[str],
+    statistics: bool = False,
 ) -> None:
     """Show the outcome of the whole testing session."""
     click.echo()
     default.display_hypothesis_output(context.hypothesis_output)
-    default.display_errors(context, event)
+    display_exceptions(context, event)
     display_warnings(context, event, warnings)
-    display_failures(context, event, warnings)
+    display_errors(context, event, warnings)
     default.display_application_logs(context, event)
-    display_statistic(context, event, warnings)
+    display_totals(context, event, warnings)
     click.echo()
-    display_summary(event, warnings)
+    display_summary(event, warnings, statistics)
+
+
+def display_exceptions(context: ExecutionContext, event: events.Finished) -> None:
+    """Display all exceptions in the test run."""
+    if not event.has_errors:
+        return
+
+    default.display_section_name("EXCEPTIONS")
+    for result in context.results:
+        if result.has_errors:
+            display_single_exception(context, result)
+    if not context.show_errors_tracebacks:
+        click.secho(
+            "Add this option to your command line parameters to see full tracebacks: --show-exception-tracebacks",
+            fg="magenta",
+        )
+
+
+def display_single_exception(
+    context: ExecutionContext, result: SerializedTestResult
+) -> None:
+    default.display_subsection(result, "magenta")
+    for error in result.errors:
+        if context.show_errors_tracebacks:
+            message = error.exception_with_traceback
+        else:
+            message = error.exception
+        click.secho(message, fg="magenta")
+        if error.example is not None:
+            display_example(error.example, "magenta", seed=result.seed)
 
 
 def display_execution_result(
@@ -49,35 +82,32 @@ def display_execution_result(
     color: str
     if event.status == Status.success:
         symbol, color = ".", "green"
-    elif warn_or_success(event.result, warnings):
+    elif event.result.checks and warn_or_success(event.result, warnings):
         symbol, color = "W", "yellow"
     elif event.status == Status.failure:
-        symbol, color = "F", "red"
-    else:
         symbol, color = "E", "red"
+    else:
+        # an exception occurred
+        symbol, color = "E", "magenta"
     context.current_line_length += len(symbol)
     click.secho(symbol, nl=False, fg=color)
 
 
-def display_failures(
+def display_errors(
     context: ExecutionContext, event: events.Finished, warnings: FrozenSet[str]
 ) -> None:
-    """Display all failures in the test run."""
-    if not event.has_failures:
+    """Display all errors in the test run."""
+    if not event.has_failures and not event.has_errors:
         return
-    failures = [
+    errors = [
         result
         for result in context.results
-        if not result.is_errored
-        and result.has_failures
-        and not warn_or_success(result, warnings)
+        if result.has_failures and not warn_or_success(result, warnings)
     ]
-    if failures:
-        default.display_section_name("FAILURES")
-        for result in failures:
-            display_single_test(
-                get_unique_failures(result.checks, warnings), result, "red"
-            )
+    if errors:
+        default.display_section_name("ERRORS")
+        for result in errors:
+            display_single_test(get_unique_errors(result.checks, warnings), result, "red")
 
 
 def display_warnings(
@@ -87,9 +117,7 @@ def display_warnings(
     if not event.has_failures:
         return
     warning_results = [
-        result
-        for result in context.results
-        if not result.is_errored and contains_warning(result, warnings)
+        result for result in context.results if contains_warning(result, warnings)
     ]
     if warning_results:
         default.display_section_name("WARNINGS")
@@ -102,7 +130,7 @@ def display_warnings(
 def display_single_test(
     unique_checks: List[SerializedCheck], result: SerializedTestResult, color: str
 ) -> None:
-    """Display a failure for a single method / endpoint."""
+    """Display an error or warning for a single method / endpoint."""
     default.display_subsection(result, color)
     display_all_checks(unique_checks, color, result.seed)
 
@@ -115,7 +143,7 @@ def display_all_checks(checks: List[SerializedCheck], color: str, seed: int) -> 
         else:
             message = None
         example = cast(SerializedCase, check.example)
-        display_example(example, check.name, message, seed, color)
+        display_example(example, color, check.name, message, seed)
         # Display every time except the last check
         if idx != len(checks):
             click.echo("\n")
@@ -123,10 +151,10 @@ def display_all_checks(checks: List[SerializedCheck], color: str, seed: int) -> 
 
 def display_example(
     case: SerializedCase,
+    color: str,
     check_name: Optional[str] = None,
     message: Optional[str] = None,
     seed: Optional[int] = None,
-    color: Optional[str] = "red",
 ) -> None:
     if message is not None:
         click.secho(message, fg=color)
@@ -161,7 +189,7 @@ def display_example(
         )
 
 
-def display_statistic(
+def display_totals(
     context: ExecutionContext, event: events.Finished, warnings: FrozenSet[str]
 ) -> None:
     """Format and print statistic collected by :obj:`models.TestResult`."""
@@ -172,7 +200,7 @@ def display_statistic(
         click.secho("No checks were performed.", bold=True)
 
     if total:
-        display_checks_statistics(total, warnings)
+        display_checks_totals(total, warnings)
 
     if context.cassette_file_name or context.junit_xml_file:
         click.echo()
@@ -186,7 +214,7 @@ def display_statistic(
         click.secho(f"{category}: {context.junit_xml_file}")
 
 
-def display_checks_statistics(
+def display_checks_totals(
     total: Dict[str, Dict[Union[str, Status], int]], warnings: FrozenSet[str]
 ) -> None:
     padding = 20
@@ -205,7 +233,7 @@ def display_checks_statistics(
     if warning_checks:
         click.secho("Warning checks:", bold=True)
         for check_name, results in warning_checks:
-            display_warning_checks(check_name, results, template)
+            display_check_result(check_name, results, template, warnings)
         click.echo()
 
     regular_checks = [
@@ -216,41 +244,24 @@ def display_checks_statistics(
     if regular_checks:
         click.secho("Performed checks:", bold=True)
         for check_name, results in regular_checks:
-            display_check_result(check_name, results, template)
-
-
-def display_warning_checks(
-    check_name: str, results: Dict[Union[str, Status], int], template: str
-) -> None:
-    """Display the summary warning checks."""
-
-    # Check contains failure, but we know check is configured to warning. Hence, treat failure as warning.
-    if Status.failure in results:
-        verdict = "WARNING"
-        color = "yellow"
-    else:
-        verdict = "PASSED"
-        color = "green"
-    success = results.get(Status.success, 0)
-    total = results.get("total", 0)
-    click.echo(
-        template.format(
-            check_name,
-            f"{success} / {total} passed",
-            click.style(verdict, fg=color, bold=True),
-        )
-    )
+            display_check_result(check_name, results, template, warnings)
 
 
 def display_check_result(
-    check_name: str, results: Dict[Union[str, Status], int], template: str
+    check_name: str,
+    results: Dict[Union[str, Status], int],
+    template: str,
+    warnings: FrozenSet[str],
 ) -> None:
     """Show the summary for a single check."""
-    if Status.failure in results:
-        verdict = "FAILED"
+    if check_name in warnings and Status.failure in results:
+        verdict = "WARNING"
+        color = "yellow"
+    elif Status.failure in results:
+        verdict = "ERROR"
         color = "red"
     else:
-        verdict = "PASSED"
+        verdict = "SUCCESS"
         color = "green"
     success = results.get(Status.success, 0)
     total = results.get("total", 0)
@@ -263,55 +274,90 @@ def display_check_result(
     )
 
 
-def display_summary(event: events.Finished, warnings: FrozenSet[str]) -> None:
-    message, color, status_code = get_summary_output(event, warnings)
+def display_summary(
+    event: events.Finished, warnings: FrozenSet[str], statistics: bool = False
+) -> None:
+    counts = get_summary_counts(event, warnings)
+    message, color, status_code = get_summary_output(counts, event, warnings)
+    if statistics:
+        display_statistical_summary(counts, event, warnings, color)
     default.display_section_name(message, fg=color)
     raise click.exceptions.Exit(status_code)
+
+
+def display_statistical_summary(
+    counts: Dict[str, int],
+    event: events.Finished,
+    warnings: FrozenSet[str],
+    color: str = "cyan",
+) -> None:
+    click.echo()
+    default.display_section_name("STATISTICS")
+    click.echo()
+    error_count, warning_count = (
+        counts["errors"],
+        counts["warnings"],
+    )
+    click.secho(f"Total warnings: {warning_count}", fg=color)
+    click.secho(f"Total errors: {error_count}", fg=color)
+    for severity, check_stats in get_results_by_severity(event, warnings).items():
+        if check_stats:
+            click.echo()
+            click.secho(severity, fg=color, bold=True, underline=True)
+            # prints the check name and counts in descending order by count
+            for check_name, count in sorted(
+                check_stats.items(), key=lambda x: x[1], reverse=True
+            ):
+                click.secho(f"{check_name} : {count}", fg=color)
+    click.echo()
+
+
+def get_results_by_severity(
+    event: events.Finished, warnings: FrozenSet[str]
+) -> Dict[str, Dict[str, int]]:
+    results: Dict[str, Dict[str, int]] = {"warnings": {}, "errors": {}}
+    for check_name, result in event.total.items():
+        if check_name in warnings and Status.failure in result:
+            results["warnings"][check_name] = result[Status.failure]
+        elif check_name not in warnings and Status.failure in result:
+            results["errors"][check_name] = result[Status.failure]
+    return results
 
 
 def get_summary_counts(
     event: events.Finished, warnings: FrozenSet[str]
 ) -> Dict[str, int]:
-    counts: Dict[str, int] = {}
-    counts["passed"] = sum(
-        results[Status.success]
-        for check_name, results in event.total.items()
-        if Status.success in results
-    )
-    counts["warned"] = sum(
-        results[Status.failure]
-        for check_name, results in event.total.items()
-        if check_name in warnings
-        if Status.failure in results
-    )
-    counts["failed"] = (
-        sum(
+    return {
+        "successes": sum(
+            results[Status.success]
+            for check_name, results in event.total.items()
+            if Status.success in results
+        ),
+        "warnings": sum(
             results[Status.failure]
             for check_name, results in event.total.items()
-            if Status.failure in results
-        )
-        - counts["warned"]
-    )
-    counts["errored"] = sum(
-        results[Status.error]
-        for check_name, results in event.total.items()
-        if Status.error in results
-    )
-    return counts
+            if check_name in warnings and Status.failure in results
+        ),
+        "errors": sum(
+            results[Status.failure]
+            for check_name, results in event.total.items()
+            if check_name not in warnings and Status.failure in results
+        ),
+        "exceptions": event.errored_count,
+    }
 
 
 def get_summary_output(
-    event: events.Finished, warnings: FrozenSet[str]
+    counts: Dict[str, int], event: events.Finished, warnings: FrozenSet[str]
 ) -> Tuple[str, str, int]:
-    counts = get_summary_counts(event, warnings)
-    stats = [f"{num} {key}" for key, num in counts.items() if num > 0]
-    if not stats:
+    counts_as_messages = [f"{num} {key}" for key, num in counts.items() if num > 0]
+    if not counts_as_messages:
         message = "No checks performed."
         color = "yellow"
         status_code = 0
     else:
-        message = f'{", ".join(stats)} in {event.running_time:.2f}s'
-        if counts["failed"] > 0 or counts["errored"] > 0:
+        message = f'{", ".join(counts_as_messages)} in {event.running_time:.2f}s'
+        if counts["errors"] > 0 or counts["exceptions"] > 0:
             color = "red"
             status_code = 1
         else:
@@ -325,7 +371,7 @@ def contains_warning(result: SerializedTestResult, warnings: FrozenSet[str]) -> 
     return any(_warn(check, warnings) for check in result.checks)
 
 
-def get_unique_failures(
+def get_unique_errors(
     checks: List[SerializedCheck], warnings: FrozenSet[str]
 ) -> List[SerializedCheck]:
     """Return only unique checks that should be displayed in the output."""
@@ -381,8 +427,9 @@ def _warn(check: SerializedCheck, warnings: FrozenSet[str]) -> bool:
 
 
 class OutputHandler(EventHandler):
-    def __init__(self, warn: FrozenSet[str]) -> None:
+    def __init__(self, warn: FrozenSet[str], statistics: bool) -> None:
         self.warn: FrozenSet[str] = warn
+        self.statistics = statistics
 
     def handle_event(
         self, context: ExecutionContext, event: events.ExecutionEvent
@@ -396,7 +443,7 @@ class OutputHandler(EventHandler):
             context.hypothesis_output.extend(event.hypothesis_output)
             handle_after_execution(context, event, self.warn)
         if isinstance(event, events.Finished):
-            handle_finished(context, event, self.warn)
+            handle_finished(context, event, self.warn, self.statistics)
         if isinstance(event, events.Interrupted):
             default.handle_interrupted(context, event)
         if isinstance(event, events.InternalError):

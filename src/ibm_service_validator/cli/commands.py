@@ -148,10 +148,17 @@ def set_environment_variable(val: str, env_var_name: str) -> None:
     help="Timeout in milliseconds for network requests during the test run.",
 )
 @click.option(
-    "--show-errors-tracebacks",
+    "--show-exception-tracebacks",
     is_flag=True,
     default=False,
-    help="Show full tracebacks for internal errors.",
+    help="Show full tracebacks for internal exceptions.",
+)
+@click.option(
+    "--statistics",
+    "-s",
+    is_flag=True,
+    default=False,
+    help="Show statistical summary of errors.",
 )
 @click.option(
     "--store-request-log",
@@ -186,7 +193,8 @@ def run(  # pylint: disable=too-many-arguments
     hypothesis_verbosity: Optional[hypothesis.Verbosity] = None,
     methods: Optional[Filter] = None,
     request_timeout: Optional[int] = None,
-    show_errors_tracebacks: bool = False,
+    show_exception_tracebacks: bool = False,
+    statistics: bool = False,
     store_request_log: Optional[click.utils.LazyFile] = None,
     tags: Optional[Filter] = None,
     with_bearer: bool = False,
@@ -206,7 +214,7 @@ def run(  # pylint: disable=too-many-arguments
     checks_off = process_config_file()
 
     selected_checks = get_selected_checks(off)
-    register_output_handler(warnings)
+    register_output_handler(warnings, statistics)
 
     # Invoke Schemathesis
     prepared_runner = runner.prepare(
@@ -236,7 +244,11 @@ def run(  # pylint: disable=too-many-arguments
         hypothesis_verbosity=hypothesis_verbosity,
     )
     execute(
-        prepared_runner, DEFAULT_WORKERS, show_errors_tracebacks, store_request_log, None
+        prepared_runner,
+        DEFAULT_WORKERS,
+        show_exception_tracebacks,
+        store_request_log,
+        None,
     )
 
 
@@ -246,7 +258,7 @@ def get_selected_checks(
     return tuple(check for check in ALL_CHECKS if check.__name__ not in off)
 
 
-def register_output_handler(warnings: FrozenSet[str]) -> None:
+def register_output_handler(warnings: FrozenSet[str], statistics: bool) -> None:
     def after_init_cli_run_handlers(
         context: HookContext,
         handlers: List[EventHandler],
@@ -259,7 +271,7 @@ def register_output_handler(warnings: FrozenSet[str]) -> None:
                 and not isinstance(handler, ShortOutputStyleHandler),
                 handlers,
             ),
-            OutputHandler(warnings),
+            OutputHandler(warnings, statistics),
         ]
 
     GLOBAL_HOOK_DISPATCHER.register(after_init_cli_run_handlers)

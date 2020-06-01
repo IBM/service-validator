@@ -16,11 +16,16 @@ __pycache__
 *.hypothesis
 log*
 
+# --- Scripts --- #
+
+install_and_run.sh
+
 # --- Setuptools --- #
 
 build
 dist
 ibm_service_validator.egg-info
+*.eggs
 
 # --- Service Validator Config --- #
 

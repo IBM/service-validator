@@ -139,6 +139,14 @@ def create_endpoint():
 
 
 @pytest.fixture()
+def invalid_schema() -> str:
+    """Return path of the mock server API definition."""
+
+    dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(dir, "mock_definitions", "invalid_schema.yaml")
+
+
+@pytest.fixture()
 def mixed_api_def() -> str:
     """Return path to API definition that causes status code conformance failure."""
 
