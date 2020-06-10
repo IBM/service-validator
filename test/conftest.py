@@ -11,9 +11,16 @@ from requests.models import Response, PreparedRequest
 from schemathesis.models import Case, Endpoint, EndpointDefinition
 
 from src.ibm_service_validator.cli.process_config import (
-    HANDBOOK_CONFIG_NAME,
+    DEFAULT_CONFIG,
     SCHEMATHESIS_CONFIG_NAME,
 )
+
+
+@pytest.fixture()
+def check_str():
+    """Comma-separated list of most of the validation functions excluding any add_case_rules."""
+    return "allow_header_in_405,location_201,no_422,no_accept_header,no_content_204,www_authenticate_401, \
+        not_a_server_error,status_code_conformance,content_type_conformance,response_schema_conformance"
 
 
 @pytest.fixture(scope="session")
@@ -42,64 +49,27 @@ def cli():
 
 
 @pytest.fixture()
-def config_object():
+def config_off_object():
     return {
-        HANDBOOK_CONFIG_NAME: {
-            "allow_header_in_405": "off",
-            "default_response_content_type": "off",
-            "location_201": "off",
-            "no_422": "off",
-            "no_accept_header": "off",
-            "no_content_204": "off",
-            "www_authenticate_401": "off",
-        },
-        SCHEMATHESIS_CONFIG_NAME: {
-            "not_a_server_error": "off",
-            "status_code_conformance": "off",
-            "content_type_conformance": "off",
-            "response_schema_conformance": "off",
-        },
+        section_name: {rule_name: "off" for rule_name in DEFAULT_CONFIG[section_name]}
+        for section_name in DEFAULT_CONFIG
     }
 
 
 @pytest.fixture()
 def config_warn_object():
     return {
-        HANDBOOK_CONFIG_NAME: {
-            "allow_header_in_405": "warn",
-            "default_response_content_type": "warn",
-            "location_201": "warn",
-            "no_422": "warn",
-            "no_accept_header": "warn",
-            "no_content_204": "warn",
-            "www_authenticate_401": "warn",
-        },
-        SCHEMATHESIS_CONFIG_NAME: {
-            "not_a_server_error": "warn",
-            "status_code_conformance": "warn",
-            "content_type_conformance": "warn",
-            "response_schema_conformance": "warn",
-        },
+        section_name: {rule_name: "warn" for rule_name in DEFAULT_CONFIG[section_name]}
+        for section_name in DEFAULT_CONFIG
     }
 
 
 @pytest.fixture()
 def config_partial_warn():
     return {
-        HANDBOOK_CONFIG_NAME: {
-            "allow_header_in_405": "on",
-            "default_response_content_type": "on",
-            "location_201": "on",
-            "no_422": "on",
-            "no_accept_header": "on",
-            "no_content_204": "on",
-            "www_authenticate_401": "on",
-        },
         SCHEMATHESIS_CONFIG_NAME: {
-            "not_a_server_error": "on",
             "status_code_conformance": "warn",
             "content_type_conformance": "warn",
-            "response_schema_conformance": "warn",
         },
     }
 
@@ -155,13 +125,15 @@ def mixed_api_def() -> str:
 
 
 @pytest.fixture()
-def mock_case():
-    return Case("http://mockapi.com")
+def mock_case(create_endpoint):
+    return Case(endpoint=create_endpoint())
 
 
 @pytest.fixture()
-def mock_response():
-    return Response()
+def mock_response(prepare_request):
+    response = Response()
+    response.request = prepare_request()
+    return response
 
 
 @pytest.fixture()

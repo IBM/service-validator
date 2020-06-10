@@ -38,6 +38,7 @@ Example Usage:
 - -a (--auth): provide server username and password in the form `username:password`.
 - -A (--auth-type): authentication mechanism. May be "basic" or "digest" (default is "basic").
 - -b (--base-url): base url of the service to be tested.
+- -c (--checks): comma-separated list of checks to run. Example: `--checks=not_a_server_error,response_schema_conformance`.
 - -B (--with-bearer): obtains a bearer token and includes it in tests. Uses [environment variables](#[env]) to obtain the bearer token.
 - -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
 - -x (--exitfirst): flag to exit and report on the first error or test failure.
@@ -98,7 +99,7 @@ Rules may be on, off, or warn. An example of the configuration file is given bel
 
     ibm_cloud_api_handbook:
         allow_header_in_405: 'on'
-        default_response_content_type: 'on'
+        invalid_request_content_type: 'on'
         location_201: 'warn'
         no_422: 'off'
         no_accept_header: 'warn'
@@ -116,10 +117,20 @@ To initialize a default configuration file in the current working directory, use
 
     ibm-service-validator init [options]
 
-#### init [options]
+#### init options
 
 - -o (--overwrite): if config file already exists, overwrite the existing config file with default values.
 - -j (--json): write the default config file as json.
+
+### Add Case Rules
+
+For some rules, we send an additional request to the API to target specific behavior. We call these rules `add_case` rules. The `invalid_request_content_type` rule, for example, tests how the API responds when it receives a request with a request body and an invalid `Content-Type` header. To make this rule effective, we need to send a request to the API with an invalid `Content-Type` header. For `invalid_request_content_type` and all other `add_case` rules listed below, we create an additional request to exercise the behavior the rule is testing. When an `add_case` rule is disabled, the additional request is also disabled.
+
+`add_case` Rules:
+
+- get_with_request_body
+- invalid_allow_header
+- invalid_request_content_type
 
 ## Including Examples in API Definition
 

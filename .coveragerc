@@ -10,5 +10,6 @@ source = src
 show_missing = true
 precision = 2
 exclude_lines =
+   pragma: no cover
    raise NotImplementedError
    pass

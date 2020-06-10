@@ -10,7 +10,10 @@ SCHEMATHESIS_CONFIG_NAME: str = "schemathesis_checks"
 DEFAULT_CONFIG: Dict[str, Dict[str, str]] = {
     HANDBOOK_CONFIG_NAME: {
         "allow_header_in_405": "on",
-        "default_response_content_type": "on",
+        "content_location": "warn",
+        "get_with_request_body": "on",
+        "invalid_accept_header": "on",
+        "invalid_request_content_type": "on",
         "location_201": "on",
         "no_422": "on",
         "no_accept_header": "on",
@@ -26,13 +29,13 @@ DEFAULT_CONFIG: Dict[str, Dict[str, str]] = {
 }
 
 
-def process_config_file() -> Tuple[FrozenSet[str], FrozenSet[str]]:
+def process_config() -> Tuple[FrozenSet[str], FrozenSet[str]]:
     config = load_config_file_as_dict(os.getcwd())
 
     if not config:
-        return frozenset(), frozenset()
+        config = DEFAULT_CONFIG
 
-    return checks_off(config), warnings(config)
+    return checks_on(config), warnings(config)
 
 
 def load_config_file_as_dict(dir: str) -> Dict[str, Any]:
@@ -54,15 +57,29 @@ def load_config_file_as_dict(dir: str) -> Dict[str, Any]:
         return load_config_file_as_dict(dir.rsplit("/", 1)[0])
 
 
-def checks_off(config: Dict[str, Any]) -> FrozenSet[str]:
-    """Returns set of all checks configured to off."""
+def checks_on(config: Dict[str, Any]) -> FrozenSet[str]:
+    """Returns all checks that are not off.
 
+    Note: warnings are included because we still want to run the warning checks.
+    """
     # YAML treats unquoted off as implicit boolean. Hence, we check "not x".
     is_off = lambda x: x == "off" or not x
+    not_on = {
+        *_get_checks(config.get(HANDBOOK_CONFIG_NAME), is_off),
+        *_get_checks(config.get(SCHEMATHESIS_CONFIG_NAME), is_off),
+    }
     return frozenset(
         {
-            *_get_checks(config.get(HANDBOOK_CONFIG_NAME), is_off),
-            *_get_checks(config.get(SCHEMATHESIS_CONFIG_NAME), is_off),
+            *(
+                rule
+                for rule in DEFAULT_CONFIG[HANDBOOK_CONFIG_NAME]
+                if rule not in not_on
+            ),
+            *(
+                rule
+                for rule in DEFAULT_CONFIG[SCHEMATHESIS_CONFIG_NAME]
+                if rule not in not_on
+            ),
         }
     )
 

@@ -40,6 +40,7 @@ jobs:
           -b http://localhost:5000
           --hypothesis-phases=generate
           --statistics
+          --no-additional-cases
 
       deploy:
         provider: releases

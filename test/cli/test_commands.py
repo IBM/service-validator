@@ -9,7 +9,10 @@ from multiprocessing import Process
 from src.ibm_service_validator.cli.commands import API_KEY, IAM_ENDPOINT
 
 from schemathesis.hooks import unregister_all
-from src.ibm_service_validator.cli.process_config import CONFIG_FILE_NAME
+from src.ibm_service_validator.cli.process_config import (
+    CONFIG_FILE_NAME,
+    HANDBOOK_CONFIG_NAME,
+)
 
 SERVER_PROCESS: Process = None
 SERVER_URL: str = None
@@ -28,23 +31,25 @@ def teardown_module():
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_run(cli, server_definition):
+def test_run(cli, server_definition, check_str):
     result = cli.run(
         server_definition,
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=explicit,generate",
+        "--no-additional-cases",
     )
 
     assert result.exit_code == ExitCode.OK
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_run_with_all_args(cli, server_definition):
+def test_run_with_all_args(cli, server_definition, check_str):
     result = cli.run(
         server_definition,
         "--auth=fake_user:fake_password",
         "--auth-type=basic",
         "--base-url=" + SERVER_URL,
+        "--checks=" + check_str,
         "--header=Authorization:Bearer 123",
         "--hypothesis-phases=generate,explicit",
         "--endpoint=allof",
@@ -53,10 +58,11 @@ def test_run_with_all_args(cli, server_definition):
         "--exitfirst",
         "--hypothesis-deadline=500",
         "--hypothesis-derandomize",
-        "--hypothesis-max-examples=10",
+        "--hypothesis-max-examples=1",
         "--hypothesis-seed=0",
         "--hypothesis-verbosity=quiet",
         "--method=get",
+        "--no-additional-cases",
         "--request-timeout=500",
         "--show-exception-tracebacks",
         "--statistics",
@@ -67,27 +73,33 @@ def test_run_with_all_args(cli, server_definition):
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_status_code_conformance_failure(cli, status_code_failure):
+def test_status_code_conformance_failure(cli, status_code_failure, check_str):
     result = cli.run(
-        status_code_failure, "--base-url=" + SERVER_URL, "--hypothesis-phases=generate",
+        status_code_failure,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=generate",
+        "--hypothesis-max-examples=1",
+        "--checks=" + check_str,
     )
 
     assert result.exit_code == ExitCode.TESTS_FAILED
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_hooks_loaded(cli, server_definition):
+def test_hooks_loaded(cli, server_definition, check_str):
     result = cli.run(
-        server_definition, "--base-url=" + SERVER_URL, "--hypothesis-phases=generate",
+        server_definition,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=generate",
+        "--hypothesis-max-examples=1",
+        "--checks=" + check_str,
     )
 
     assert result.exit_code == ExitCode.OK
     # Makes sure handbook rule is loaded and included in output
     assert any(
-        [
-            "no_422" in line
-            for line in result.stdout.split("Performed checks")[1].split("\n")
-        ]
+        "no_422" in line
+        for line in result.stdout.split("Performed checks")[1].split("\n")
     )
 
 
@@ -118,7 +130,7 @@ def test_main(cli):
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_replay(tmp_cwd, cli, server_definition):
+def test_replay(tmp_cwd, cli, server_definition, check_str):
     """Tests cassettes and replay feature with basic args."""
 
     # runs test suite and creates cassette in tmp_cwd
@@ -128,6 +140,8 @@ def test_replay(tmp_cwd, cli, server_definition):
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=explicit,generate",
         "--store-request-log=" + log_file,
+        "--hypothesis-max-examples=1",
+        "--checks=" + check_str,
     )
     assert result.exit_code == ExitCode.OK
 
@@ -139,7 +153,7 @@ def test_replay(tmp_cwd, cli, server_definition):
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_replay_with_args(tmp_cwd, cli, server_definition):
+def test_replay_with_args(tmp_cwd, cli, server_definition, check_str):
     """Tests cassettes and replay feature with basic args."""
 
     # runs test suite and creates cassette in tmp_cwd
@@ -149,6 +163,8 @@ def test_replay_with_args(tmp_cwd, cli, server_definition):
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=explicit,generate",
         "--store-request-log=" + log_file,
+        "--hypothesis-max-examples=1",
+        "--checks=" + check_str,
     )
     assert result.exit_code == ExitCode.OK
 
@@ -159,7 +175,7 @@ def test_replay_with_args(tmp_cwd, cli, server_definition):
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_replay_with_args_1(tmp_cwd, cli, server_definition):
+def test_replay_with_args_1(tmp_cwd, cli, server_definition, check_str):
     """Tests cassettes and replay feature with basic args."""
 
     # runs test suite and creates cassette in tmp_cwd
@@ -169,6 +185,8 @@ def test_replay_with_args_1(tmp_cwd, cli, server_definition):
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=explicit,generate",
         "--store-request-log=" + log_file,
+        "--hypothesis-max-examples=1",
+        "--checks=" + check_str,
     )
     assert result.exit_code == ExitCode.OK
 
@@ -179,7 +197,7 @@ def test_replay_with_args_1(tmp_cwd, cli, server_definition):
 
 
 @pytest.mark.usefixtures("reset_hooks")
-def test_replay_with_args_2(tmp_cwd, cli, server_definition):
+def test_replay_with_args_2(tmp_cwd, cli, server_definition, check_str):
     """Tests cassettes and replay feature with basic args."""
 
     # runs test suite and creates cassette in tmp_cwd
@@ -189,6 +207,8 @@ def test_replay_with_args_2(tmp_cwd, cli, server_definition):
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=explicit,generate",
         "--store-request-log=" + log_file,
+        "--hypothesis-max-examples=1",
+        "--checks=" + check_str,
     )
     assert result.exit_code == ExitCode.OK
 
@@ -212,6 +232,8 @@ def test_warning_output(
         status_code_failure,
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=explicit,generate",
+        "--hypothesis-max-examples=1",
+        "--no-additional-cases",
     )
 
     assert result.exit_code == ExitCode.OK
@@ -232,12 +254,14 @@ def test_warning_output_1(
         mixed_api_def,
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=explicit,generate",
+        "--hypothesis-max-examples=1",
+        "--no-additional-cases",
     )
 
     assert result.exit_code == ExitCode.TESTS_FAILED
     # gets non-empty lines
     lines = [*filter(lambda x: x, result.stdout.split("\n"))]
-    assert "71 successes, 4 warnings, 2 errors in" in lines[-1]
+    assert "4 warnings, 2 errors in" in lines[-1]
     assert any("Warning checks:" in line for line in lines)
     assert any("Performed checks:" in line for line in lines)
     assert any("== WARNINGS ==" in line for line in lines)
@@ -249,7 +273,12 @@ def test_exceptions(tmp_cwd, cli, invalid_schema):
     """Tests that EXCEPTIONS section created with InvalidSchema Exception."""
 
     result = cli.main(
-        "run", invalid_schema, "--base-url=" + SERVER_URL, "--hypothesis-phases=generate",
+        "run",
+        invalid_schema,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=generate",
+        "--hypothesis-max-examples=1",
+        "--no-additional-cases",
     )
 
     assert result.exit_code == ExitCode.TESTS_FAILED
@@ -272,7 +301,9 @@ def test_statistics(tmp_cwd, cli, config_partial_warn, mixed_api_def, write_to_f
         mixed_api_def,
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=generate",
+        "--hypothesis-max-examples=1",
         "--statistics",
+        "--no-additional-cases",
     )
 
     assert result.exit_code == ExitCode.TESTS_FAILED
@@ -297,7 +328,9 @@ def test_bearer_token(cli, need_authorization):
         need_authorization,
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=generate",
+        "--hypothesis-max-examples=1",
         "--with-bearer",
+        "--no-additional-cases",
     )
 
     assert result.exit_code == ExitCode.OK
@@ -317,8 +350,10 @@ def test_bearer_token_1(cli, need_authorization):
         need_authorization,
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=generate",
+        "--hypothesis-max-examples=1",
         "--header=Authorization:aslkdavlkndfkadfkasldfk",
         "--with-bearer",
+        "--no-additional-cases",
     )
 
     assert result.exit_code == ExitCode.INTERRUPTED
@@ -343,13 +378,44 @@ def test_bearer_token_2(cli, need_authorization):
         need_authorization,
         "--base-url=" + SERVER_URL,
         "--hypothesis-phases=generate",
+        "--hypothesis-max-examples=1",
         "--with-bearer",
+        "--no-additional-cases",
     )
 
     assert result.exit_code == ExitCode.INTERRUPTED
     # gets non-empty lines
     lines = [*filter(lambda x: x, result.stdout.split("\n"))]
     assert f"Must set {API_KEY}" in lines[-1]
+
+
+@pytest.mark.usefixtures("reset_hooks")
+def test_add_case(tmp_cwd, cli, config_off_object, write_to_file, server_definition):
+    """Tests that add_case hooks create additional tests.
+
+    Also, tests that additional case not created when corresponding validation function is off.
+    """
+    # we turn only one check on that has an associated add_case hook
+    config_off_object[HANDBOOK_CONFIG_NAME]["get_with_request_body"] = "on"
+    write_to_file(CONFIG_FILE_NAME + ".yaml", config_off_object, yaml.safe_dump)
+
+    result = cli.run(
+        server_definition,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=explicit,generate",
+        "--hypothesis-max-examples=1",
+    )
+
+    assert result.exit_code == ExitCode.OK
+    # gets non-empty lines
+    lines = [*filter(lambda x: x, result.stdout.split("\n"))]
+    endpoint_count_line = next(
+        filter(lambda line: line.startswith("collected endpoint"), lines)
+    )
+    endpoint_count_as_str = endpoint_count_line.split(": ")[1]
+    # We turned on 1 check that has an associated add_case hook, so we expect 2n tests where n is number of endpoints.
+    expected_test_count = int(endpoint_count_as_str) * 2
+    assert str(expected_test_count) + " successes" in lines[-1]
 
 
 @pytest.fixture

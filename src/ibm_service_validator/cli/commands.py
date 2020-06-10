@@ -21,10 +21,10 @@ from schemathesis import checks as checks_module
 from schemathesis.models import Case
 
 from ibm_service_validator.cli.handlers.output_handler import OutputHandler
-from ibm_service_validator.validation_hooks import HANDBOOK_RULES
+from ibm_service_validator.handbook_rules import ADD_CASE_HOOKS, HANDBOOK_RULES
 from ibm_service_validator.cli.process_config import (
     create_default_config,
-    process_config_file,
+    process_config,
 )
 
 ALL_CHECKS: tuple = checks_module.ALL_CHECKS + HANDBOOK_RULES
@@ -74,6 +74,14 @@ def set_environment_variable(val: str, env_var_name: str) -> None:
     "-b",
     callback=callbacks.validate_base_url,
     help="The base-url of the API.",
+)
+@click.option(
+    "--checks",
+    "-c",
+    type=str,
+    default="",
+    callback=lambda _, __, s: [c.strip() for c in s.split(",") if c.strip()],
+    help="Comma-separated list of checks to run.",
 )
 @click.option(
     "--header",
@@ -143,6 +151,12 @@ def set_environment_variable(val: str, env_var_name: str) -> None:
     help="Filter schemathesis test by HTTP method.",
 )
 @click.option(
+    "--no-additional-cases",
+    is_flag=True,
+    default=False,
+    help="Additional requests that target specific API behavior will not be sent.",
+)
+@click.option(
     "--request-timeout",
     type=click.IntRange(1),
     help="Timeout in milliseconds for network requests during the test run.",
@@ -182,6 +196,7 @@ def run(  # pylint: disable=too-many-arguments
     auth: Optional[Tuple[str, str]],
     auth_type: str,
     base_url: Optional[str],
+    checks: Optional[List[str]],
     headers: Dict[str, str],
     hypothesis_phases: Optional[List[hypothesis.Phase]],
     endpoints: Optional[Filter] = None,
@@ -192,6 +207,7 @@ def run(  # pylint: disable=too-many-arguments
     hypothesis_seed: Optional[int] = None,
     hypothesis_verbosity: Optional[hypothesis.Verbosity] = None,
     methods: Optional[Filter] = None,
+    no_additional_cases: bool = False,
     request_timeout: Optional[int] = None,
     show_exception_tracebacks: bool = False,
     statistics: bool = False,
@@ -201,8 +217,6 @@ def run(  # pylint: disable=too-many-arguments
 ) -> None:
     # pylint: disable=too-many-locals
 
-    off, warnings = process_config_file()
-
     if with_bearer:
         if "Authorization" not in headers and "authorization" not in headers:
             headers["Authorization"] = get_bearer_token()
@@ -211,10 +225,12 @@ def run(  # pylint: disable=too-many-arguments
                 "--with-bearer flag used but Authorization header provided with --header."
             )
 
-    checks_off = process_config_file()
+    on, warnings = (frozenset(checks), frozenset()) if checks else process_config()
 
-    selected_checks = get_selected_checks(off)
+    selected_checks = get_selected_checks(on)
     register_output_handler(warnings, statistics)
+    if not no_additional_cases:
+        register_add_case_hooks(on)
 
     # Invoke Schemathesis
     prepared_runner = runner.prepare(
@@ -253,9 +269,9 @@ def run(  # pylint: disable=too-many-arguments
 
 
 def get_selected_checks(
-    off: Iterable[str],
+    on: FrozenSet[str],
 ) -> Iterable[Callable[[Response, Case], None]]:
-    return tuple(check for check in ALL_CHECKS if check.__name__ not in off)
+    return tuple(check for check in ALL_CHECKS if check.__name__ in on)
 
 
 def register_output_handler(warnings: FrozenSet[str], statistics: bool) -> None:
@@ -277,6 +293,15 @@ def register_output_handler(warnings: FrozenSet[str], statistics: bool) -> None:
     GLOBAL_HOOK_DISPATCHER.register(after_init_cli_run_handlers)
 
 
+def register_add_case_hooks(on: FrozenSet) -> None:
+    # pylint: disable=bad-str-strip-call
+    add_case_prefix = "add_"
+    for case_hook in ADD_CASE_HOOKS:
+        # add add_case hook if its corresponding check is on
+        if case_hook.__name__.lstrip(add_case_prefix) in on:
+            GLOBAL_HOOK_DISPATCHER.register_hook_with_name("add_case", case_hook)
+
+
 def get_bearer_token() -> str:
     if API_KEY not in os.environ or IAM_ENDPOINT not in os.environ:
         raise click.UsageError(
@@ -288,8 +313,8 @@ def get_bearer_token() -> str:
             os.environ[API_KEY], url=os.environ[IAM_ENDPOINT]
         ).token_manager.get_token()
         return "Bearer {0}".format(bearer_token)
-    except Exception as e:
-        raise RuntimeError("Problem getting bearer token.") from e
+    except Exception as e:  # pragma: no cover
+        raise RuntimeError("Problem getting bearer token.") from e  # pragma: no cover
 
 
 @ibm_service_validator.command(short_help="Create a default config file.")

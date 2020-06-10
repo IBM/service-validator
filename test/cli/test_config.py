@@ -3,12 +3,12 @@ import json
 import yaml
 
 from src.ibm_service_validator.cli.process_config import (
-    checks_off,
+    checks_on,
     create_default_config,
     load_config_file_as_dict,
     open_get_data_close,
     open_write_close,
-    process_config_file,
+    process_config,
 )
 from src.ibm_service_validator.cli.process_config import (
     CONFIG_FILE_NAME,
@@ -18,94 +18,93 @@ from src.ibm_service_validator.cli.process_config import (
 )
 
 
-def test_process_config_file(tmp_cwd, config_object, write_to_file):
+def test_process_config(tmp_cwd, config_off_object, write_to_file):
     # create a config file in the temp cwd
-    write_to_file(CONFIG_FILE_NAME + ".yaml", config_object, yaml.safe_dump)
+    write_to_file(CONFIG_FILE_NAME + ".yaml", config_off_object, yaml.safe_dump)
 
-    off, warnings = process_config_file()
+    on, warnings = process_config()
 
-    assert all(
-        rule in off
-        for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
-        if val == "off" or val == False
-    )
-
-
-def test_process_config_file_1(tmp_cwd, config_object, write_to_file):
-    # create a config file in the temp cwd
-    write_to_file(CONFIG_FILE_NAME + ".yml", config_object, yaml.safe_dump)
-
-    off, warnings = process_config_file()
-
-    assert all(
-        rule in off
-        for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
-        if val == "off" or val == False
-    )
-
-
-def test_process_config_file_2(tmp_cwd, config_object, write_to_file):
-    # create a config file in the temp cwd
-    write_to_file(CONFIG_FILE_NAME + ".json", config_object, json.dump)
-
-    off, warnings = process_config_file()
-
-    assert all(
-        rule in off
-        for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
-        if val == "off" or val == False
-    )
-
-
-def test_process_config_file_3(tmp_cwd):
-    """Ensure we receive an empty set when no config file is present."""
-    # did not create a config file
-    off, warnings = process_config_file()
-    assert not off
+    assert not on
     assert not warnings
 
 
-def test_process_config_file_4(tmp_cwd, config_warn_object, write_to_file):
-    """Ensure we receive an empty set when no config file is present."""
-    # did not create a config file
-    write_to_file(CONFIG_FILE_NAME + ".json", config_warn_object, json.dump)
-    off, warnings = process_config_file()
+def test_process_config_1(tmp_cwd, config_off_object, write_to_file):
+    # create a config file in the temp cwd
+    write_to_file(CONFIG_FILE_NAME + ".yml", config_off_object, yaml.safe_dump)
 
+    on, warnings = process_config()
+
+    assert not on
+    assert not warnings
+
+
+def test_process_config_2(tmp_cwd, config_off_object, write_to_file):
+    # create a config file in the temp cwd
+    write_to_file(CONFIG_FILE_NAME + ".json", config_off_object, json.dump)
+
+    on, warnings = process_config()
+
+    assert not on
+    assert not warnings
+
+
+def test_process_config_3(tmp_cwd):
+    """Ensure the checks match the default config when no config file present."""
+    # did not create a config file, DEFAULT_CONFIG used
+    on, warnings = process_config()
     assert all(
-        rule in warnings
-        for rule, val in config_warn_object[HANDBOOK_CONFIG_NAME].items()
-        if val == "warn"
+        all(rule in on for rule, val in rules.items() if val and val != "off")
+        for _, rules in DEFAULT_CONFIG.items()
+    )
+    assert all(
+        all(rule in warnings for rule, val in rules.items() if val == "warn")
+        for _, rules in DEFAULT_CONFIG.items()
     )
 
 
-def test_load_config_file_as_dict(tmp_cwd, config_object, write_to_file):
-    write_to_file(CONFIG_FILE_NAME + ".yaml", config_object, yaml.safe_dump)
+def test_process_config_4(tmp_cwd, config_warn_object, write_to_file):
+    """Ensure all checks are set to warnings."""
+    write_to_file(CONFIG_FILE_NAME + ".json", config_warn_object, json.dump)
+    on, warnings = process_config()
+
+    assert all(
+        all(rule in on for rule, val in rules.items() if val and val != "off")
+        for _, rules in config_warn_object.items()
+    )
+    assert all(
+        all(rule in warnings for rule, val in rules.items() if val == "warn")
+        for _, rules in config_warn_object.items()
+    )
+
+
+def test_load_config_file_as_dict(tmp_cwd, config_off_object, write_to_file):
+    write_to_file(CONFIG_FILE_NAME + ".yaml", config_off_object, yaml.safe_dump)
 
     config = load_config_file_as_dict(tmp_cwd)
 
-    assert config == config_object
+    assert config == config_off_object
 
 
-def test_load_config_file_as_dict_1(tmp_cwd, config_object, write_to_file):
-    write_to_file(CONFIG_FILE_NAME + ".yml", config_object, yaml.safe_dump)
-
-    config = load_config_file_as_dict(tmp_cwd)
-
-    assert config == config_object
-
-
-def test_load_config_file_as_dict_2(tmp_cwd, config_object, write_to_file):
-    write_to_file(CONFIG_FILE_NAME + ".json", config_object, json.dump)
+def test_load_config_file_as_dict_1(tmp_cwd, config_off_object, write_to_file):
+    write_to_file(CONFIG_FILE_NAME + ".yml", config_off_object, yaml.safe_dump)
 
     config = load_config_file_as_dict(tmp_cwd)
 
-    assert config == config_object
+    assert config == config_off_object
 
 
-def test_load_config_file_as_dict_3(tmp_cwd, config_object, write_to_file):
+def test_load_config_file_as_dict_2(tmp_cwd, config_off_object, write_to_file):
+    write_to_file(CONFIG_FILE_NAME + ".json", config_off_object, json.dump)
+
+    config = load_config_file_as_dict(tmp_cwd)
+
+    assert config == config_off_object
+
+
+def test_load_config_file_as_dict_3(tmp_cwd, config_off_object, write_to_file):
     """Test finding the config file in a parent directory."""
 
-    write_to_file(CONFIG_FILE_NAME + ".json", config_object, json.dump)
+    write_to_file(CONFIG_FILE_NAME + ".json", config_off_object, json.dump)
 
     # Make child directory, set cwd to child directory, and call
     # load from starting from child directory
@@ -114,43 +113,33 @@ def test_load_config_file_as_dict_3(tmp_cwd, config_object, write_to_file):
     os.chdir(child_dir_name)
     config = load_config_file_as_dict(os.getcwd())
 
-    assert config == config_object
+    assert config == config_off_object
 
 
-def test_checks_off(config_object):
-    checks_turned_off = checks_off(config_object)
-
-    assert all(
-        rule in checks_turned_off
-        for rule, val in config_object[HANDBOOK_CONFIG_NAME].items()
-        if val == "off" or val == False
-    )
+def test_checks_on(config_off_object):
+    assert not checks_on(config_off_object)
 
 
-def test_checks_off_1(config_object):
-    checks_turned_off = checks_off(config_object)
-
-    all_config_rules = dict(
-        **config_object[HANDBOOK_CONFIG_NAME], **config_object[SCHEMATHESIS_CONFIG_NAME]
-    )
-    assert all(
-        rule in checks_turned_off
-        for rule, val in all_config_rules.items()
-        if val == "off" or val == False
-    )
-
-
-def test_checks_off_2():
+def test_checks_on_1():
     mock_config = {HANDBOOK_CONFIG_NAME: ["should not be a list"]}
+    on = checks_on(mock_config)
 
-    # rules must be dict not list, so we expect empty set
-    assert not checks_off(mock_config)
+    # no checks explicitly set to off or warn
+    assert all(
+        all(rule in on for rule, val in rules.items() if val and val != "off")
+        for _, rules in DEFAULT_CONFIG.items()
+    )
 
 
-def test_checks_off_3():
+def test_checks_on_2():
     mock_config = {"not a valid key": {"rule1": "off"}}
+    on = checks_on(mock_config)
 
-    assert not checks_off(mock_config)
+    # no checks explicitly set to off or warn
+    assert all(
+        all(rule in on for rule, val in rules.items() if val and val != "off")
+        for _, rules in DEFAULT_CONFIG.items()
+    )
 
 
 def test_create_default_config(tmp_cwd):
@@ -194,29 +183,29 @@ def test_create_default_config_3(tmp_cwd, write_to_file):
     assert open_get_data_close(path_to_file, json.load) == json_config
 
 
-def test_open_get_data_close(tmp_cwd, config_object, write_to_file):
+def test_open_get_data_close(tmp_cwd, config_off_object, write_to_file):
     file_name = "temp_file.yaml"
-    write_to_file(file_name, config_object, yaml.safe_dump)
+    write_to_file(file_name, config_off_object, yaml.safe_dump)
 
     path_to_file = os.path.join(str(tmp_cwd), file_name)
-    assert open_get_data_close(path_to_file, yaml.safe_load) == config_object
+    assert open_get_data_close(path_to_file, yaml.safe_load) == config_off_object
 
 
-def test_open_write_close(tmp_cwd, config_object):
+def test_open_write_close(tmp_cwd, config_off_object):
     file_name = "temp_file.yaml"
 
-    open_write_close(file_name, config_object, yaml.safe_dump)
+    open_write_close(file_name, config_off_object, yaml.safe_dump)
     path_to_file = os.path.join(str(tmp_cwd), file_name)
-    assert open_get_data_close(path_to_file, yaml.safe_load) == config_object
+    assert open_get_data_close(path_to_file, yaml.safe_load) == config_off_object
 
 
-def test_open_write_close_twice(tmp_cwd, config_object):
+def test_open_write_close_twice(tmp_cwd, config_off_object):
     """Write the config object twice. Test that only one config object is in the file."""
     file_name = "temp_file.yaml"
 
     # write to file twice
-    open_write_close(file_name, config_object, yaml.safe_dump)
-    open_write_close(file_name, config_object, yaml.safe_dump)
+    open_write_close(file_name, config_off_object, yaml.safe_dump)
+    open_write_close(file_name, config_off_object, yaml.safe_dump)
 
     path_to_file = os.path.join(str(tmp_cwd), file_name)
-    assert open_get_data_close(path_to_file, yaml.safe_load) == config_object
+    assert open_get_data_close(path_to_file, yaml.safe_load) == config_off_object
