@@ -1,0 +1,42 @@
+openapi: 3.0.0
+info:
+  license:
+    name: MIT
+  title: Example service
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /get:
+    post:
+      operationId: get_string
+      responses:
+        '201':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleSchema'
+        '415':
+          description: no content-type header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleSchema'
+components:
+  schemas:
+    SimpleSchema:
+      description: an object with a string field
+      required:
+        - foo
+      properties:
+        foo:
+          type: string
+      type: object
+      examples:
+        example1:
+          value:
+            foo: no way this string was randomly generated!
+        example2:
+          value:
+            foo: this is the other example!

@@ -41,6 +41,34 @@ def handle_finished(
     display_summary(event, warnings, statistics)
 
 
+def handle_internal_error(context: ExecutionContext, event: events.InternalError) -> None:
+    display_internal_error(context, event)
+    raise click.Abort
+
+
+def display_internal_error(
+    context: ExecutionContext, event: events.InternalError
+) -> None:
+    click.secho(event.message, fg="red")
+    if event.exception:
+        if context.show_errors_tracebacks:
+            message = f"Error: {event.exception_with_traceback}\n"
+        else:
+            message = (
+                f"Error: {event.exception}\n"
+                f"Add this option to your command line parameters to see full tracebacks: --show-exception-tracebacks"
+            )
+        if event.exception_type == "jsonschema.exceptions.ValidationError":
+            message += (
+                "\n\nYou can disable input schema validation with --validate-schema=false "
+                "command-line option.\nIn this case, we cannot guarantee proper"
+                " behavior during the test run."
+            )
+        click.secho(
+            message, fg="red",
+        )
+
+
 def display_exceptions(context: ExecutionContext, event: events.Finished) -> None:
     """Display all exceptions in the test run."""
     if not event.has_errors:
@@ -447,4 +475,4 @@ class OutputHandler(EventHandler):
         if isinstance(event, events.Interrupted):
             default.handle_interrupted(context, event)
         if isinstance(event, events.InternalError):
-            default.handle_internal_error(context, event)
+            handle_internal_error(context, event)

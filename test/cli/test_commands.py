@@ -67,6 +67,7 @@ def test_run_with_all_args(cli, server_definition, check_str):
         "--show-exception-tracebacks",
         "--statistics",
         "--tag=test_tag",
+        "--validate-schema=true",
     )
 
     assert result.exit_code == ExitCode.OK
@@ -416,6 +417,42 @@ def test_add_case(tmp_cwd, cli, config_off_object, write_to_file, server_definit
     # We turned on 1 check that has an associated add_case hook, so we expect 2n tests where n is number of endpoints.
     expected_test_count = int(endpoint_count_as_str) * 2
     assert str(expected_test_count) + " successes" in lines[-1]
+
+
+def test_internal_exception(tmp_cwd, cli, invalid_examples):
+    """Tests that InternalError output is correct with invalid API definition."""
+
+    result = cli.main(
+        "run",
+        invalid_examples,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=explicit",
+    )
+
+    assert result.exit_code == ExitCode.TESTS_FAILED
+    # gets non-empty lines
+    lines = [*filter(lambda x: x, result.stdout.split("\n"))]
+    assert "--show-exception-tracebacks" in lines[-3]
+    assert "--validate-schema=false" in lines[-2]
+
+
+@pytest.mark.usefixtures("reset_hooks")
+def test_internal_exception_1(tmp_cwd, cli, invalid_examples):
+    """Tests that InternalError output is correct with invalid API definition."""
+
+    result = cli.main(
+        "run",
+        invalid_examples,
+        "--base-url=" + SERVER_URL,
+        "--hypothesis-phases=explicit",
+        "--show-exception-tracebacks",
+    )
+
+    assert result.exit_code == ExitCode.TESTS_FAILED
+    # gets non-empty lines
+    lines = [*filter(lambda x: x, result.stdout.split("\n"))]
+    assert "--show-exception-tracebacks" not in lines[-3]
+    assert "--validate-schema=false" in lines[-2]
 
 
 @pytest.fixture

@@ -109,8 +109,16 @@ def create_endpoint():
 
 
 @pytest.fixture()
+def invalid_examples() -> str:
+    """Return path to a schema with invalid examples field."""
+
+    dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(dir, "mock_definitions", "invalid_examples.yaml")
+
+
+@pytest.fixture()
 def invalid_schema() -> str:
-    """Return path of the mock server API definition."""
+    """Return path to the invalid API definition."""
 
     dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(dir, "mock_definitions", "invalid_schema.yaml")

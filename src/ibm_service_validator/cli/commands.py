@@ -189,6 +189,12 @@ def set_environment_variable(val: str, env_var_name: str) -> None:
     help="Filter schemathesis test by schema tag pattern.",
 )
 @click.option(
+    "--validate-schema",
+    help="Enable or disable validation of input schema.",
+    type=bool,
+    default=True,
+)
+@click.option(
     "--with-bearer", "-B", is_flag=True, help="Flag to send bearer token with requests."
 )
 def run(  # pylint: disable=too-many-arguments
@@ -213,6 +219,7 @@ def run(  # pylint: disable=too-many-arguments
     statistics: bool = False,
     store_request_log: Optional[click.utils.LazyFile] = None,
     tags: Optional[Filter] = None,
+    validate_schema: bool = True,
     with_bearer: bool = False,
 ) -> None:
     # pylint: disable=too-many-locals
@@ -249,7 +256,7 @@ def run(  # pylint: disable=too-many-arguments
         seed=hypothesis_seed,
         store_interactions=store_request_log is not None,
         tag=tags,
-        validate_schema=True,
+        validate_schema=validate_schema,
         workers_num=DEFAULT_WORKERS,
         hypothesis_deadline=hypothesis_deadline,
         hypothesis_derandomize=hypothesis_derandomize,

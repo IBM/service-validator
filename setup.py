@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ibm_service_validator",
-    version="0.0.3",
+    version="0.1.0",
     description="Python package, Schemathesis, extended to include IBM API Handbook validation.",
     url="https://github.ibm.com/CloudEngineering/ibm-service-validator",
     author="Barrett Schonefeld, IBM",
