@@ -39,6 +39,7 @@ script:
     --no-additional-cases
 before_deploy:
   - npm install npm@latest -g
+  - nvm install 12
   - npm install @semantic-release/changelog
   - npm install @semantic-release/exec
   - npm install @semantic-release/git
