@@ -1,0 +1,21 @@
+{
+  "debug": true,
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    "@semantic-release/exec",
+    [
+      "@semantic-release/git",
+      {
+        "message": "chore(release): ${nextRelease.version} release notes\n\n${nextRelease.notes}"
+      }
+    ],
+    ["@semantic-release/github", {
+        "assets": [
+            {"path": "dist/*.whl", "name": "ibm_service_validator-${nextRelease.gitTag}.whl", "label": ".whl distribution"},
+            {"path": "dist/*.tar.gz", "name": "ibm_service_validator-${nextRelease.gitTag}.tar.gz", "label": ".tar distribution"}
+        ]
+    }]
+  ]
+}
