@@ -37,3 +37,7 @@ ibm-service-validator-config.*
 coverage.xml
 .coverage
 *.tox
+
+# --- virtual environments --- #
+.venv/
+venv/

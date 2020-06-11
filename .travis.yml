@@ -18,6 +18,7 @@ install:
   - pip install pre-commit
   - pip install tox
   - pip install flask
+
 script:
   - pre-commit run --all-files
   - tox -e py37
@@ -37,13 +38,16 @@ script:
     --hypothesis-phases=generate
     --statistics
     --no-additional-cases
+
 before_deploy:
+  - pip install bump2version
   - npm install npm@latest -g
   - nvm install 12
   - npm install @semantic-release/changelog
   - npm install @semantic-release/exec
   - npm install @semantic-release/git
   - npm install @semantic-release/github
+
 deploy:
   provider: script
   script: npx semantic-release
