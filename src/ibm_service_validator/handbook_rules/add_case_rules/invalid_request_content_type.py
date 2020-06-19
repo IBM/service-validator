@@ -1,13 +1,20 @@
+from typing import Optional
+from requests import Response
+
 from schemathesis.models import Case
 from schemathesis.hooks import HookContext
-from requests.models import Response
 
-from . import get_request_header, set_request_header
+from . import get_request_header, original_case_successful, set_request_header
 
 
-def add_invalid_request_content_type(context: HookContext, case: Case) -> Case:
-    set_request_header(case, "Content-Type", "invalid/content/type")
-    return case
+def add_invalid_request_content_type(
+    context: HookContext, case: Case, response: Response
+) -> Optional[Case]:
+    if original_case_successful(response):
+        set_request_header(case, "Content-Type", "invalid/content/type")
+        return case
+    else:
+        return None
 
 
 def invalid_request_content_type(response: Response, case: Case) -> None:

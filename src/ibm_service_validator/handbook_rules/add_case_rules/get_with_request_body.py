@@ -1,12 +1,22 @@
+from typing import Optional
+from requests import Response
+
 from schemathesis.models import Case
 from schemathesis.hooks import HookContext
-from schemathesis.models import Response
+
+from . import original_case_successful
 
 
-def add_get_with_request_body(context: HookContext, case: Case) -> Case:
-    if case.method.upper() == "GET":
+def add_get_with_request_body(
+    context: HookContext, case: Case, response: Response
+) -> Optional[Case]:
+    if original_case_successful(response) and case.method.upper() == "GET":
+        # add request body if the original case received 2xx response
         case.body = {"requestBody": "request body passed with GET."}
-    return case
+        return case
+    else:
+        # otherwise, do not create an additional test case
+        return None
 
 
 def get_with_request_body(response: Response, case: Case) -> None:

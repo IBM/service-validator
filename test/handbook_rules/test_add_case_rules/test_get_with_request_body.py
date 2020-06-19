@@ -7,10 +7,21 @@ from src.ibm_service_validator.handbook_rules.add_case_rules import (
 )
 
 
-def test_add_get_with_request_body(mock_case):
+def test_add_get_with_request_body_positive(mock_case, mock_response):
     mock_case.endpoint.method = "GET"
-    new_case = hooks.add_get_with_request_body(HookContext(mock_case), mock_case)
-    assert new_case.body
+    mock_response.status_code = 200
+    new_case = hooks.add_get_with_request_body(
+        HookContext(mock_case), mock_case, mock_response
+    )
+    assert new_case.method.upper() == "GET" and new_case.body
+
+
+def test_add_get_with_request_body_negative(mock_case, mock_response):
+    mock_case.endpoint.method = "GET"
+    mock_response.status_code = 400
+    assert not hooks.add_get_with_request_body(
+        HookContext(mock_case), mock_case, mock_response
+    )
 
 
 def test_get_with_request_body_positive(mock_case, mock_response, prepare_request):

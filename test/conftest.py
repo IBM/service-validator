@@ -93,7 +93,7 @@ def create_endpoint():
         return Endpoint(
             path,
             method,
-            EndpointDefinition(raw=definition, scope="global"),
+            EndpointDefinition(raw=definition, resolved=definition, scope="global"),
             schema,
             app,
             base_url,

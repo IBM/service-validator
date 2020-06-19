@@ -7,15 +7,29 @@ from src.ibm_service_validator.handbook_rules.add_case_rules import (
 )
 
 
-def test_add_invalid_accept_header(mock_case):
-    new_case = hooks.add_invalid_accept_header(HookContext(mock_case.endpoint), mock_case)
+def test_add_invalid_accept_header(mock_case, mock_response):
+    mock_response.status_code = 200
+    new_case = hooks.add_invalid_accept_header(
+        HookContext(mock_case.endpoint), mock_case, mock_response
+    )
     assert new_case.headers["Accept"] == "invalid/accept"
 
 
-def test_add_invalid_accept_header_1(mock_case):
+def test_add_invalid_accept_header_1(mock_case, mock_response):
     mock_case.headers = {"accept": "application/json"}
-    new_case = hooks.add_invalid_accept_header(HookContext(mock_case.endpoint), mock_case)
+    mock_response.status_code = 200
+    new_case = hooks.add_invalid_accept_header(
+        HookContext(mock_case.endpoint), mock_case, mock_response
+    )
     assert new_case.headers["accept"] == "invalid/accept"
+
+
+def test_add_invalid_accept_header_negative(mock_case, mock_response):
+    mock_case.headers = {"accept": "application/json"}
+    mock_response.status_code = 400
+    assert not hooks.add_invalid_accept_header(
+        HookContext(mock_case.endpoint), mock_case, mock_response
+    )
 
 
 def test_invalid_accept_header_positive(mock_case, mock_response, prepare_request):

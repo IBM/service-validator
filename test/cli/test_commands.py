@@ -39,7 +39,7 @@ def test_run(cli, server_definition, check_str):
         "--no-additional-cases",
     )
 
-    assert result.exit_code == ExitCode.OK
+    assert result.exit_code == ExitCode.OK, result.stdout
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -70,7 +70,7 @@ def test_run_with_all_args(cli, server_definition, check_str):
         "--validate-schema=true",
     )
 
-    assert result.exit_code == ExitCode.OK
+    assert result.exit_code == ExitCode.OK, result.stdout
 
 
 @pytest.mark.usefixtures("reset_hooks")
@@ -83,7 +83,7 @@ def test_status_code_conformance_failure(cli, status_code_failure, check_str):
         "--checks=" + check_str,
     )
 
-    assert result.exit_code == ExitCode.TESTS_FAILED
+    assert result.exit_code == ExitCode.TESTS_FAILED, result.stdout
 
 
 @pytest.mark.usefixtures("reset_hooks")

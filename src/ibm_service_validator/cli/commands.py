@@ -272,6 +272,7 @@ def run(  # pylint: disable=too-many-arguments
         show_exception_tracebacks,
         store_request_log,
         None,
+        0,
     )
 
 
@@ -306,7 +307,7 @@ def register_add_case_hooks(on: FrozenSet) -> None:
     for case_hook in ADD_CASE_HOOKS:
         # add add_case hook if its corresponding check is on
         if case_hook.__name__.lstrip(add_case_prefix) in on:
-            GLOBAL_HOOK_DISPATCHER.register_hook_with_name("add_case", case_hook)
+            GLOBAL_HOOK_DISPATCHER.register_hook_with_name(case_hook, "add_case")
 
 
 def get_bearer_token() -> str:

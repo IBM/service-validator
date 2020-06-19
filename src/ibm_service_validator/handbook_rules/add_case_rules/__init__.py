@@ -1,4 +1,4 @@
-from requests import PreparedRequest
+from requests import PreparedRequest, Response
 
 from schemathesis.models import Case
 
@@ -9,6 +9,10 @@ def get_request_header(request: PreparedRequest, header_name: str) -> str:
         if request and request.headers and header_name in request.headers
         else ""
     )
+
+
+def original_case_successful(response: Response) -> bool:
+    return 200 <= response.status_code < 300
 
 
 def set_request_header(case: Case, header_name: str, header_val: str) -> None:

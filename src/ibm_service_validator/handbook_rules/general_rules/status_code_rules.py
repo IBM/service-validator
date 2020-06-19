@@ -1,4 +1,4 @@
-from requests.models import Response
+from requests import Response
 from schemathesis.models import Case
 
 
