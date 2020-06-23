@@ -18,12 +18,12 @@ install:
   - pip install pre-commit
   - pip install tox
   - pip install flask
+  - python3 -m pip install setuptools wheel
 
 script:
   - pre-commit run --all-files
   - tox -e py37
   # packages the project and saves the names of the files into file_arr
-  - python3 -m pip install setuptools wheel
   - python3 setup.py sdist bdist_wheel
   - file_arr=($(ls dist/))
   # installs our packaged tool
@@ -49,8 +49,17 @@ before_deploy:
   - npm install @semantic-release/github
 
 deploy:
-  provider: script
-  script: npx semantic-release
-  skip_cleanup: true
-  on:
-    branch: master
+  - provider: script
+    script: npx semantic-release
+    skip_cleanup: true
+    on:
+      branch: master
+  - provider: releases
+    api_key: $GH_TOKEN
+    file_glob: true
+    file:
+      - dist/*.whl
+      - dist/*.tar
+    skip_cleanup: true
+    on:
+      tags: true
