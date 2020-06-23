@@ -1,4 +1,4 @@
-# ibm-service-validator 0.0.2
+# ibm-service-validator 0.1.0
 
 Extends [Schemathesis](https://github.com/kiwicom/schemathesis) to test [IBM API Handbook](https://cloud.ibm.com/docs/api-handbook?topic=api-handbook-intro) compliance and consistency between an API implementation and its OpenAPI definition.
 
