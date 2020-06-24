@@ -1,3 +1,10 @@
+# [0.2.0](https://github.ibm.com/CloudEngineering/ibm-service-validator/compare/v0.1.0...v0.2.0) (2020-06-24)
+
+
+### Features
+
+* verbosity option ([#28](https://github.ibm.com/CloudEngineering/ibm-service-validator/issues/28)) ([15bdfb9](https://github.ibm.com/CloudEngineering/ibm-service-validator/commit/15bdfb9bdeb1802017b0e521b0ecd16c25d1a2f6))
+
 # [0.1.0](https://github.ibm.com/CloudEngineering/ibm-service-validator/compare/v0.0.2...v0.1.0) (2020-06-23)
 
 
