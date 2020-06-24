@@ -68,6 +68,7 @@ def test_run_with_all_args(cli, server_definition, check_str):
         "--statistics",
         "--tag=test_tag",
         "--validate-schema=true",
+        "--verbosity",
     )
 
     assert result.exit_code == ExitCode.OK, result.stdout

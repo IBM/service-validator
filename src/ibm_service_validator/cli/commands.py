@@ -194,6 +194,7 @@ def set_environment_variable(val: str, env_var_name: str) -> None:
     type=bool,
     default=True,
 )
+@click.option("--verbosity", "-v", help="Control verbosity of output.", count=True)
 @click.option(
     "--with-bearer", "-B", is_flag=True, help="Flag to send bearer token with requests."
 )
@@ -220,6 +221,7 @@ def run(  # pylint: disable=too-many-arguments
     store_request_log: Optional[click.utils.LazyFile] = None,
     tags: Optional[Filter] = None,
     validate_schema: bool = True,
+    verbosity: int = 0,
     with_bearer: bool = False,
 ) -> None:
     # pylint: disable=too-many-locals
@@ -272,7 +274,7 @@ def run(  # pylint: disable=too-many-arguments
         show_exception_tracebacks,
         store_request_log,
         None,
-        0,
+        verbosity,
     )
 
 

@@ -39,9 +39,10 @@ Example Usage:
 - -A (--auth-type): authentication mechanism. May be "basic" or "digest" (default is "basic").
 - -b (--base-url): base url of the service to be tested.
 - -c (--checks): comma-separated list of checks to run. Example: `--checks=not_a_server_error,response_schema_conformance`.
-- -B (--with-bearer): obtains a bearer token and includes it in tests. Uses [environment variables](#[env]) to obtain the bearer token.
-- -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
 - -x (--exitfirst): flag to exit and report on the first error or test failure.
+- -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
+- -v (--verbosity): increase the verbosity of the report. Examples: `-v`, `-vv`.
+- -B (--with-bearer): obtains a bearer token and includes it in tests. Uses [environment variables](#[env]) to obtain the bearer token.
 - --show-errors-tracebacks: flag to show error tracebacks for internal errors.
 - --store-request-log: name of yaml file in which to store logs of requests made during testing. Example: `--store-request-log=logs.yaml`.
 - --hypothesis-deadline: number of milliseconds allowed for the server to respond (default is 500). Example: `--hypothesis-deadline=300`.
@@ -134,11 +135,11 @@ For some rules, we send an additional request to the API to target specific beha
 
 ## Including Examples in API Definition
 
-Often, a service's requirements are stricter than its schema. For example, an `account_id` may have schema, `type: string`. However, a valid `account_id` is restricted to the set of strings associated with an accounts. For this reason, the default way to generate requests is to use [OpenAPI examples](https://swagger.io/docs/specification/adding-examples/) in the API definition.
+Often, a service's requirements are stricter than its schema. For example, an `account_id` may have schema, `type: string`. However, a valid `account_id` is restricted to the set of strings associated with an accounts. For this reason, the default way to generate requests is to use [OpenAPI examples](https://swagger.io/docs/specification/adding-examples/) in the API definition. Notice examples may be provided using the `example` and `examples` keywords. The service validator supports both `example` and `examples`.
 
-### Important Note on Property Examples
+### Important Note on Providing an Object Example
 
-Examples for object properties should be provided in an example object rather than on a per-property basis. Hence, for the schema:
+Examples for object properties should be provided in an example object instead of individual property examples. Hence, for the schema:
 
     schema:
         type: object
