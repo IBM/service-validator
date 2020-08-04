@@ -15,7 +15,7 @@ setup(
     install_requires=["click", "ibm-cloud-sdk-core", "pyyaml", "schemathesis"],
     entry_points="""
         [console_scripts]
-        ibm-service-validator=ibm_service_validator.cli.commands:ibm_service_validator
+        ibm-service-validator=ibm_service_validator.cli:ibm_service_validator
     """,
     classifiers=[
         "Programming Language :: Python :: 3",

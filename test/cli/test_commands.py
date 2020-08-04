@@ -6,8 +6,7 @@ import yaml
 
 from ..mock_server import flask_app
 from multiprocessing import Process
-from src.ibm_service_validator.cli.commands import API_KEY, IAM_ENDPOINT
-
+from src.ibm_service_validator.cli import API_KEY, IAM_ENDPOINT
 from schemathesis.hooks import unregister_all
 from src.ibm_service_validator.cli.process_config import (
     CONFIG_FILE_NAME,

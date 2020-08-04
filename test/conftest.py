@@ -4,8 +4,8 @@ from typing import Any, Callable, Dict, IO
 
 from click.testing import CliRunner
 
+import ibm_service_validator.cli
 from .mock_server import flask_app
-from src.ibm_service_validator.cli import commands
 
 from requests.models import Response, PreparedRequest
 from schemathesis.models import Case, Endpoint, EndpointDefinition
@@ -31,19 +31,21 @@ def cli():
     class Runner:
         @staticmethod
         def run(*args, **kwargs):
-            return cli_runner.invoke(commands.run, args, **kwargs)
+            return cli_runner.invoke(ibm_service_validator.cli.run, args, **kwargs)
 
         @staticmethod
         def init(*args, **kwargs):
-            return cli_runner.invoke(commands.init, args, **kwargs)
+            return cli_runner.invoke(ibm_service_validator.cli.init, args, **kwargs)
 
         @staticmethod
         def replay(*args, **kwargs):
-            return cli_runner.invoke(commands.replay, args, **kwargs)
+            return cli_runner.invoke(ibm_service_validator.cli.replay, args, **kwargs)
 
         @staticmethod
         def main(*args, **kwargs):
-            return cli_runner.invoke(commands.ibm_service_validator, args, **kwargs)
+            return cli_runner.invoke(
+                ibm_service_validator.cli.ibm_service_validator, args, **kwargs
+            )
 
     return Runner()
 
