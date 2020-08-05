@@ -11,8 +11,8 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 ## Install
 
 1. Find the version of the endpoint validator you want to use in the [releases](https://github.ibm.com/CloudEngineering/ibm-service-validator/releases) tab.
-2. In your current working directory, download the corresponding .whl (recommended) or .tar.gz file.
-3. `pip install ibm_service_validator-<version>.whl` or `pip install ibm_service_validator-<version>.tar.gz`
+2. Download the corresponding .whl (recommended) or .tar.gz file.
+3. Install with pip and a path to the file: `pip install ibm_service_validator-<version>.whl` or `pip install ibm_service_validator-<version>.tar.gz`
 
 ## Use
 
@@ -42,7 +42,7 @@ Example Usage:
 - -x (--exitfirst): flag to exit and report on the first error or test failure.
 - -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
 - -v (--verbosity): increase the verbosity of the report. Examples: `-v`, `-vv`.
-- -B (--with-bearer): obtains a bearer token and includes it in tests. Uses [environment variables](#[env]) to obtain the bearer token.
+- -B (--with-bearer): obtains a bearer token and includes it in tests. Uses [environment variables](#env) to obtain the bearer token.
 - --show-errors-tracebacks: flag to show error tracebacks for internal errors.
 - --store-request-log: name of yaml file in which to store logs of requests made during testing. Example: `--store-request-log=logs.yaml`.
 - --hypothesis-deadline: number of milliseconds allowed for the server to respond (default is 500). Example: `--hypothesis-deadline=300`.
