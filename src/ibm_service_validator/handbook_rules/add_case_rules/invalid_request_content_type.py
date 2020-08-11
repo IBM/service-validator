@@ -24,7 +24,7 @@ def invalid_request_content_type(response: Response, case: Case) -> Optional[boo
     ):
         assert (
             response.status_code == 415
-        ), "415 status code must be used when the client sends a payload with a content-type not supported by the server."
+        ), "415 status code must be used when the client sends a payload with a content-type not supported by the server. https://cloud.ibm.com/docs/api-handbook?topic=api-handbook-headers#representation-headers"
     else:
         # skips the check when it's not relevant
         return True

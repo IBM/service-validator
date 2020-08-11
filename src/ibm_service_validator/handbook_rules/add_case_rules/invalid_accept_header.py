@@ -22,7 +22,7 @@ def invalid_accept_header(response: Response, case: Case) -> Optional[bool]:
     if accept_header == "invalid/accept":
         assert (
             response.status_code == 406
-        ), "Requests including Accept header with only unsupported formats MUST be rejected with a 406 status code."
+        ), "Requests including Accept header with only unsupported formats MUST be rejected with a 406 status code. https://cloud.ibm.com/docs/api-handbook?topic=api-handbook-headers#negotiation-headers"
     else:
         # skips the check when it's not relevant
         return True

@@ -28,7 +28,7 @@ def get_with_request_body(response: Response, case: Case) -> Optional[bool]:
     if request.method == "GET" and request.body:
         assert (
             200 <= response.status_code < 300
-        ), "Request body with a GET request must not cause an error."
+        ), "Request body with a GET request must not cause an error. https://cloud.ibm.com/docs/api-handbook?topic=api-handbook-methods#get"
     else:
         # skips the test when it's not relevant
         return True
