@@ -1,3 +1,10 @@
+# [0.3.0](https://github.ibm.com/CloudEngineering/ibm-service-validator/compare/v0.2.0...v0.3.0) (2020-08-11)
+
+
+### Features
+
+* conditional checks ([#33](https://github.ibm.com/CloudEngineering/ibm-service-validator/issues/33)) ([f017996](https://github.ibm.com/CloudEngineering/ibm-service-validator/commit/f0179965c3e5c1a97b96c2bc9b418b62de5944b8))
+
 # [0.2.0](https://github.ibm.com/CloudEngineering/ibm-service-validator/compare/v0.1.0...v0.2.0) (2020-06-24)
 
 
