@@ -20,7 +20,7 @@ classifiers = [
 ]
 authors = ["Barrett Schonefeld <barrett.schonefeld@ibm.com>"]
 readme = "README.md"
-repository = "https://github.ibm.com/CloudEngineering/ibm-service-validator"
+repository = "https://github.com/IBM/service-validator"
 
 [tool.poetry.dependencies]
 click = "^7.0"

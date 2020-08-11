@@ -6,7 +6,7 @@ setup(
     name="ibm_service_validator",
     version=__version__,
     description="Python package, Schemathesis, extended to include IBM API Handbook validation.",
-    url="https://github.ibm.com/CloudEngineering/ibm-service-validator",
+    url="https://github.com/IBM/service-validator",
     author="Barrett Schonefeld, IBM",
     author_email="barrett.schonefeld@ibm.com",
     packages=find_packages("src"),
@@ -19,6 +19,7 @@ setup(
     """,
     classifiers=[
         "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: Apache 2.0 License",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
