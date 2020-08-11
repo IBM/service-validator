@@ -1,3 +1,10 @@
+# [0.4.0](https://github.ibm.com/CloudEngineering/ibm-service-validator/compare/v0.3.0...v0.4.0) (2020-08-11)
+
+
+### Features
+
+* include links to the API handbook in error messages ([#35](https://github.ibm.com/CloudEngineering/ibm-service-validator/issues/35)) ([c83cb44](https://github.ibm.com/CloudEngineering/ibm-service-validator/commit/c83cb445907326c624ab8b9e0d3fcb8804a6fb23))
+
 # [0.3.0](https://github.ibm.com/CloudEngineering/ibm-service-validator/compare/v0.2.0...v0.3.0) (2020-08-11)
 
 
