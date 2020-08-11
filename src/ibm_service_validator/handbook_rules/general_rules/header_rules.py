@@ -1,15 +1,21 @@
+from typing import Optional
+
 from requests import Response
 from schemathesis.models import Case
 
 
-def allow_header_in_405(response: Response, case: Case) -> None:
+def allow_header_in_405(response: Response, case: Case) -> Optional[bool]:
     if response.status_code == 405:
         assert (
             response.headers and "Allow" in response.headers
         ), "For 405 response, must provide the Allow header with the list of accepted request methods."
+    else:
+        # skips the test when it's not relevant
+        return True
+    return None
 
 
-def content_location(response: Response, case: Case) -> None:
+def content_location(response: Response, case: Case) -> Optional[bool]:
     if response.status_code == 200 and case.method.upper() in {"PUT", "PATCH"}:
         assert (
             response.headers and "Content-Location" in response.headers
@@ -41,28 +47,43 @@ def content_location(response: Response, case: Case) -> None:
         assert (
             response.headers and "Content-Location" in response.headers
         ), "For 202 response from a DELETE, PATCH, POST, or PUT, should provide Content-Location header with the URI where resource may be obtained."
+    else:
+        # skips the test when it's not relevant
+        return True
+    return None
 
 
-def location_201(response: Response, case: Case) -> None:
+def location_201(response: Response, case: Case) -> Optional[bool]:
     if response.status_code == 201:
         assert (
             response.headers and "Location" in response.headers
         ), "For 201 response, must provide Location header with the URI of the created resource."
+    else:
+        # skips the test when it's not relevant
+        return True
+    return None
 
 
-def no_accept_header(response: Response, case: Case) -> None:
+def no_accept_header(response: Response, case: Case) -> Optional[bool]:
     request_headers = response.request.headers
-    if response.content:
-        if not request_headers or "Accept" not in request_headers:
-            assert (
-                response.headers
-                and "Content-Type" in response.headers
-                and response.headers["Content-Type"].startswith("application/json")
-            ), "Accept header not provided in the request. Response must be JSON, and Content-Type header must start with application/json."
+    if response.content and (not request_headers or "Accept" not in request_headers):
+        assert (
+            response.headers
+            and "Content-Type" in response.headers
+            and response.headers["Content-Type"].startswith("application/json")
+        ), "Accept header not provided in the request. Response must be JSON, and Content-Type header must start with application/json."
+    else:
+        # skips the test when it's not relevant
+        return True
+    return None
 
 
-def www_authenticate_401(response: Response, case: Case) -> None:
+def www_authenticate_401(response: Response, case: Case) -> Optional[bool]:
     if response.status_code == 401:
         assert (
             response.headers and "WWW-Authenticate" in response.headers
         ), "401 response must have WWW-Authenticate header."
+    else:
+        # skips the test when it's not relevant
+        return True
+    return None

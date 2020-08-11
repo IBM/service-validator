@@ -23,7 +23,8 @@ disable =
   too-few-public-methods,
   bad-continuation,
   inconsistent-return-statements,
-  redefined-builtin
+  redefined-builtin,
+  useless-return
 
 
 [REPORTS]

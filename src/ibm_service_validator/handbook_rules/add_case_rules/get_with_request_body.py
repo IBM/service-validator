@@ -19,7 +19,7 @@ def add_get_with_request_body(
         return None
 
 
-def get_with_request_body(response: Response, case: Case) -> None:
+def get_with_request_body(response: Response, case: Case) -> Optional[bool]:
     """Validates that request body is ignored for otherwise valid GET request.
 
     Assumes the constructed request is valid aside from the request body.
@@ -29,3 +29,7 @@ def get_with_request_body(response: Response, case: Case) -> None:
         assert (
             200 <= response.status_code < 300
         ), "Request body with a GET request must not cause an error."
+    else:
+        # skips the test when it's not relevant
+        return True
+    return None

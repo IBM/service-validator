@@ -17,7 +17,7 @@ def add_invalid_request_content_type(
         return None
 
 
-def invalid_request_content_type(response: Response, case: Case) -> None:
+def invalid_request_content_type(response: Response, case: Case) -> Optional[bool]:
     if (
         response.request.body
         and get_request_header(response.request, "Content-Type") == "invalid/content/type"
@@ -25,3 +25,7 @@ def invalid_request_content_type(response: Response, case: Case) -> None:
         assert (
             response.status_code == 415
         ), "415 status code must be used when the client sends a payload with a content-type not supported by the server."
+    else:
+        # skips the check when it's not relevant
+        return True
+    return None

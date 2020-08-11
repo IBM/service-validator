@@ -17,9 +17,13 @@ def add_invalid_accept_header(
         return None
 
 
-def invalid_accept_header(response: Response, case: Case) -> None:
+def invalid_accept_header(response: Response, case: Case) -> Optional[bool]:
     accept_header = get_request_header(response.request, "Accept")
     if accept_header == "invalid/accept":
         assert (
             response.status_code == 406
         ), "Requests including Accept header with only unsupported formats MUST be rejected with a 406 status code."
+    else:
+        # skips the check when it's not relevant
+        return True
+    return None
