@@ -24,7 +24,8 @@ script:
   - python3 setup.py sdist bdist_wheel
   - file_arr=($(ls dist/))
   # installs our packaged tool
-  - poetry add dist/${file_arr[0]}
+  - pip install dist/${file_arr[0]}
+  - pip install --upgrade attrs
   # sets the Travis-CI shell width because Schemathesis needs a value for shell width
   - stty cols 80
   # starts test server and runs our tool against the server
