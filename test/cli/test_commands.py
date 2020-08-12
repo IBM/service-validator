@@ -414,9 +414,10 @@ def test_add_case(tmp_cwd, cli, config_off_object, write_to_file, server_definit
         filter(lambda line: line.startswith("collected endpoint"), lines)
     )
     endpoint_count_as_str = endpoint_count_line.split(": ")[1]
-    # We turned on 1 check that has an associated add_case hook, so we expect 2n tests where n is number of endpoints.
-    expected_test_count = int(endpoint_count_as_str) * 2
-    assert str(expected_test_count) + " successes" in lines[-1]
+    # We turned on 1 check that has an associated add_case hook. By default, no GET requests
+    # will have a request body. The add_case hook will add a request body for each endpoint,
+    # so we should have one test per endpoint.
+    assert str(endpoint_count_as_str) + " successes" in lines[-1]
 
 
 def test_internal_exception(tmp_cwd, cli, invalid_examples):
