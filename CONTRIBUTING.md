@@ -12,11 +12,17 @@ Commits _must_ follow the [Angular commit message guidelines](https://github.com
 
 This repository uses [pre-commit](https://pre-commit.com/) to auto-format and lint code. Install this tool to auto-format and lint your code before each commit.
 
+## Install Dependencies
+
+1. Install poetry using the [poetry installation guide](https://python-poetry.org/docs/#installation).
+
+2. Set your current working directory to the root of the project, and run `poetry install` to dowload the dependencies.
+
 ## Pull Requests
 
 1. Fork the repository.
 
-2. Enable and install [pre-commit](https://pre-commit.com/) to lint and format code.
+2. Run `pre-commit install` to enable the the pre-commit hook (install [pre-commit](https://pre-commit.com/) if you do not already have it). This will run code formatters and linters.
 
 3. Run tests with `tox`:
 

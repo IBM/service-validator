@@ -30,6 +30,7 @@ pyyaml = "^5.3"
 schemathesis = "^2.3"
 
 [tool.poetry.dev-dependencies]
+pre-commit = "^2.0"
 coverage = "^4.5"
 pytest = ">4.6.4"
 pytest-mock = "^1.11.0"

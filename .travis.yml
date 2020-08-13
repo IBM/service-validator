@@ -14,7 +14,6 @@ install:
   - pip install pre-commit
   - pip install tox
   - pip install flask
-  - pip install poetry
   - python3 -m pip install setuptools wheel
 
 script:
