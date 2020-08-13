@@ -2,7 +2,7 @@
 
 ## Bug Reports and Issues
 
-Issues and bug reports may be submitted [here](https://github.ibm.com/arf/planning-sdk-squad/issues).
+[Issues and bug reports](https://github.com/IBM/service-validator/issues).
 
 ## Commits
 
