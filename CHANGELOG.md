@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/IBM/service-validator/compare/v0.4.0...v0.4.1) (2020-08-13)
+
+
+### Bug Fixes
+
+* update setup.py and pyproject for PyPI distributions ([#2](https://github.com/IBM/service-validator/issues/2)) ([692d31d](https://github.com/IBM/service-validator/commit/692d31d89a761352cca39e43e1cf594be22e4d16))
+
 # [0.4.0](https://github.ibm.com/CloudEngineering/ibm-service-validator/compare/v0.3.0...v0.4.0) (2020-08-11)
 
 
