@@ -1,3 +1,11 @@
+## [0.4.2](https://github.com/IBM/service-validator/compare/v0.4.1...v0.4.2) (2020-08-13)
+
+
+### Bug Fixes
+
+* remove invalid classifier from setup.py ([#3](https://github.com/IBM/service-validator/issues/3)) ([f8146e2](https://github.com/IBM/service-validator/commit/f8146e263db7d283911b3055b4b267b6f4127909))
+* update link to issues and bug reports ([7631422](https://github.com/IBM/service-validator/commit/76314229d6f21288bab63fd27a687136b2fdeac1))
+
 ## [0.4.1](https://github.com/IBM/service-validator/compare/v0.4.0...v0.4.1) (2020-08-13)
 
 
