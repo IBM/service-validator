@@ -358,7 +358,9 @@ def init(write_json: bool, overwrite: bool) -> None:
     "--uri", help="A regexp that filters requests by their request URI.", type=str
 )
 @click.option(
-    "--method", help="A regexp that filters requests by their request method.", type=str,
+    "--method",
+    help="A regexp that filters requests by their request method.",
+    type=str,
 )
 @click.pass_context
 def replay(  # pylint: disable=too-many-arguments
