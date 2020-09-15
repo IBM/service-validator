@@ -6,15 +6,15 @@ Extends [Schemathesis](https://github.com/kiwicom/schemathesis) to test [IBM API
 
 This tool takes an OpenAPI definition, a valid API endpoint, and any necessary API credentials and verifies that the API implementation complies with its OpenAPI definition and the [IBM API Handbook](https://cloud.ibm.com/docs/api-handbook?topic=api-handbook-intro).
 
-# Python Version
+## Python Version
 
 The minimum python version supported is 3.5.8
 
 ## Install
 
-1. The Service Validator is distributed through PyPI, and you may install using `pip`.
+The Service Validator is distributed through PyPI, and you may install using `pip`.
 
-    pip install ibm-service-validator
+    pip3 install ibm-service-validator
 
 ## Use
 
@@ -41,7 +41,7 @@ Example Usage:
 - -A (--auth-type): authentication mechanism. May be "basic" or "digest" (default is "basic").
 - -b (--base-url): base url of the service to be tested.
 - -c (--checks): comma-separated list of checks to run. Example: `--checks=not_a_server_error,response_schema_conformance`.
-- - See [configuration](#configuration) for full list of checks
+  - See [configuration](#configuration) for full list of checks
 - -x (--exitfirst): flag to exit and report on the first error or test failure.
 - -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
 - -v (--verbosity): increase the verbosity of the report using the repetition of options. Examples: `-v`, `-vv`, `-vvv` in order of increasing verbosity. We only use one level of verbosity but this is passed to schemathesis which may utilize more levels of verbosity.
@@ -66,6 +66,7 @@ Filter tests by endpoints, methods, and/or tags that match a given endpoint/meth
 - -E (--endpoint) Example: `-E /users/create`, will only test endpoints containing `/users/create`
 - -M (--method) Example: `-M GET`, will only test endpoints with GET requests
 - -T (--tag) Example: `-T custom_tag`, will only test endpoints with the schema defined tag of `custom_tag`
+- -O (--operation-id) Example: `-O custom_operation_id`, will only test the endpoint with the `custom_operation_id` operation_id
 
 Options when generating test data for schema definitions without schema defined examples. When there is no example defined in the API definition, these options will determine how the mock-data is generated when testing that endpoint.
 
