@@ -6,6 +6,10 @@ Extends [Schemathesis](https://github.com/kiwicom/schemathesis) to test [IBM API
 
 This tool takes an OpenAPI definition, a valid API endpoint, and any necessary API credentials and verifies that the API implementation complies with its OpenAPI definition and the [IBM API Handbook](https://cloud.ibm.com/docs/api-handbook?topic=api-handbook-intro).
 
+# Python Version
+
+The minimum python version supported is 3.5.8
+
 ## Install
 
 1. The Service Validator is distributed through PyPI, and you may install using `pip`.
@@ -18,7 +22,7 @@ This tool takes an OpenAPI definition, a valid API endpoint, and any necessary A
 
 The `run` command runs a suite of tests against the service using an API definition.
 
-    ibm-service-validator [env] run <path API definition> --base-url <base URL of API> [options]
+    ibm-service-validator [env] run <API definition> --base-url <base URL of API> [run options]
 
 #### [env]
 
@@ -37,32 +41,33 @@ Example Usage:
 - -A (--auth-type): authentication mechanism. May be "basic" or "digest" (default is "basic").
 - -b (--base-url): base url of the service to be tested.
 - -c (--checks): comma-separated list of checks to run. Example: `--checks=not_a_server_error,response_schema_conformance`.
+- - See [configuration](#configuration) for full list of checks
 - -x (--exitfirst): flag to exit and report on the first error or test failure.
 - -H (--header): custom header to include in all requests. Example: `-H Authorization:Bearer\ 123`.
-- -v (--verbosity): increase the verbosity of the report. Examples: `-v`, `-vv`.
+- -v (--verbosity): increase the verbosity of the report using the repetition of options. Examples: `-v`, `-vv`, `-vvv` in order of increasing verbosity. We only use one level of verbosity but this is passed to schemathesis which may utilize more levels of verbosity.
 - -B (--with-bearer): obtains a bearer token and includes it in tests. Uses [environment variables](#env) to obtain the bearer token.
 - --show-errors-tracebacks: flag to show error tracebacks for internal errors.
 - --store-request-log: name of yaml file in which to store logs of requests made during testing. Example: `--store-request-log=logs.yaml`.
 - --hypothesis-deadline: number of milliseconds allowed for the server to respond (default is 500). Example: `--hypothesis-deadline=300`.
-- --hypothesis-phases: determines how test data will be generated. **The default value, `explicit`, indicates test data will only be generated from examples in the OpenAPI definition.** Example: `--hypothesis-deadline=explicit,generate` will use explicit OpenAPI examples and generate test data.
+- --hypothesis-phases: determines how test data will be generated. **The default value, `explicit`, indicates test data will only be generated from examples in the OpenAPI definition.** Example: `--hypothesis-phases=explicit,generate` will use explicit OpenAPI examples and generate test data.
   - `explicit`: test data generated from examples. Recommended.
   - `reuse`: reuse old test data.
   - `generate`: test data generated from schema definition.
   - `target`: mutate test data for targeting.
   - `shrink`: shrink test data.
-- --hypothesis-verbosity: control how much information is reported.
+- --hypothesis-verbosity: control how much information is reported. Example: `--hypothesis-verbosity=verbose`
   - `quiet`
   - `normal`
   - `verbose`
   - `debug`
 
-Filter tests by endpoints, methods, and/or tags that match a given endpoint/method/tag pattern.
+Filter tests by endpoints, methods, and/or tags that match a given endpoint/method/tag pattern. 
 
-- -E (--endpoint)
-- -M (--method)
-- -T (--tag)
+- -E (--endpoint) Example: `-E /users/create`, will only test endpoints containing `/users/create`
+- -M (--method) Example: `-M GET`, will only test endpoints with GET requests
+- -T (--tag) Example: `-T custom_tag`, will only test endpoints with the schema defined tag of `custom_tag`
 
-Options when generating test data from schema definitions (test data comes from OpenAPI examples by default):
+Options when generating test data for schema definitions without schema defined examples. When there is no example defined in the API definition, these options will determine how the mock-data is generated when testing that endpoint.
 
 - --hypothesis-derandomize: this flag is used to generate test data deterministically instead of generating random, valid test data.
 - --hypothesis-max-examples: this value determines the maximum number of tests to generate for each method. Example: `--hypothesis-max-examples=50`.
@@ -75,6 +80,12 @@ The `replay` command runs a snapshot of tests and compares new results to the or
     ibm-service-validator replay path/to/logs.yaml [options]
 
 Note: To capture these logs, run the service validator with the `--store-request-log` option.
+
+Example: 
+- `ibm-service-validator run path/to/mock_server.yaml --base-url https://localhost:5000 --store-request-log=request_log.yaml`
+- `ibm-service-validator replay request_log.yaml --status=FAILURE`
+
+This will re-run the service validator on the previous run but only on the endpoints that returned a FAILURE and will report the new result for each endpoint.
 
 #### replay options
 
@@ -98,12 +109,15 @@ Rules may be on, off, or warn. An example of the configuration file is given bel
 
     ibm_cloud_api_handbook:
         allow_header_in_405: 'on'
+        content_location: warn
+        get_with_request_body: 'on'
+        invalid_accept_header: 'on'
         invalid_request_content_type: 'on'
-        location_201: 'warn'
-        no_422: 'off'
-        no_accept_header: 'warn'
+        location_201: 'on'
+        no_422: 'on'
+        no_accept_header: 'on'
         no_content_204: 'on'
-        www_authenticate_401: 'warn'
+        www_authenticate_401: 'on'
     schemathesis_checks:
         not_a_server_error: 'on'
         status_code_conformance: 'warn'
@@ -128,12 +142,12 @@ For some rules, we send an additional request to the API to target specific beha
 `add_case` Rules:
 
 - get_with_request_body
-- invalid_allow_header
+- invalid_accept_header
 - invalid_request_content_type
 
 ## Including Examples in API Definition
 
-Often, a service's requirements are stricter than its schema. For example, an `account_id` may have schema, `type: string`. However, a valid `account_id` is restricted to the set of strings associated with an accounts. For this reason, the default way to generate requests is to use [OpenAPI examples](https://swagger.io/docs/specification/adding-examples/) in the API definition. Notice examples may be provided using the `example` and `examples` keywords. The service validator supports both `example` and `examples`.
+Often, a service's requirements are stricter than its schema. For example, an `account_id` may have schema, `type: string`. However, a valid `account_id` is restricted to the set of strings associated with an account. For this reason, the default way to generate requests is to use [OpenAPI examples](https://swagger.io/docs/specification/adding-examples/) in the API definition. Notice examples may be provided using the `example` and `examples` keywords. The service validator supports both `example` and `examples`.
 
 ### Important Note on Providing an Object Example
 
