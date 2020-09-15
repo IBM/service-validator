@@ -65,7 +65,8 @@ def display_internal_error(
                 " behavior during the test run."
             )
         click.secho(
-            message, fg="red",
+            message,
+            fg="red",
         )
 
 
