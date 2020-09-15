@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/IBM/service-validator/compare/v0.4.2...v0.5.0) (2020-09-15)
+
+
+### Features
+
+* Filter tests by operation_id ([a88689a](https://github.com/IBM/service-validator/commit/a88689a34b5609b028be72ced20b59a1e87115ad))
+
 ## [0.4.2](https://github.com/IBM/service-validator/compare/v0.4.1...v0.4.2) (2020-08-13)
 
 
