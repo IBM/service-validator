@@ -204,6 +204,15 @@ def set_environment_variable(val: str, env_var_name: str) -> None:
     help="Filter schemathesis test by schema tag pattern.",
 )
 @click.option(
+    "--operation-id",
+    "-O",
+    "operation_ids",
+    type=str,
+    multiple=True,
+    help="Filter schemathesis test by operationId pattern.",
+    callback=callbacks.validate_regex,
+)
+@click.option(
     "--validate-schema",
     help="Enable or disable validation of input schema.",
     type=bool,
@@ -235,6 +244,7 @@ def run(  # pylint: disable=too-many-arguments
     statistics: bool = False,
     store_request_log: Optional[click.utils.LazyFile] = None,
     tags: Optional[Filter] = None,
+    operation_ids: Optional[Filter] = None,
     validate_schema: bool = True,
     verbosity: int = 0,
     with_bearer: bool = False,
@@ -273,6 +283,7 @@ def run(  # pylint: disable=too-many-arguments
         seed=hypothesis_seed,
         store_interactions=store_request_log is not None,
         tag=tags,
+        operation_id=operation_ids,
         validate_schema=validate_schema,
         workers_num=DEFAULT_WORKERS,
         hypothesis_deadline=hypothesis_deadline,
