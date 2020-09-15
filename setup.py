@@ -15,7 +15,7 @@
 
 from setuptools import setup, find_packages
 
-__version__ = "0.4.2"
+__version__ = "0.5.0"
 
 with open("README.md", "r") as fh:
     readme = fh.read()

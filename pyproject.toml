@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ibm-service-validator"
-version = "0.4.2"
+version = "0.5.0"
 description = "Extension of endpoint validator, Schemathesis."
 packages = [
     { include = "src" }
