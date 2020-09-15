@@ -112,7 +112,7 @@ def display_single_exception(
             message = error.exception
         click.secho(message, fg="magenta")
         if error.example is not None:
-            display_example(error.example, "magenta", seed=result.seed)
+            display_example(error.example, "magenta", result=result)
 
 
 def display_execution_result(
@@ -176,10 +176,12 @@ def display_single_test(
 ) -> None:
     """Display an error or warning for a single method / endpoint."""
     default.display_subsection(result, color)
-    display_all_checks(unique_checks, color, result.seed)
+    display_all_checks(unique_checks, color, result)
 
 
-def display_all_checks(checks: List[SerializedCheck], color: str, seed: int) -> None:
+def display_all_checks(
+    checks: List[SerializedCheck], color: str, result: SerializedTestResult
+) -> None:
     for idx, check in enumerate(checks, 1):
         message: Optional[str]
         if check.message:
@@ -187,18 +189,40 @@ def display_all_checks(checks: List[SerializedCheck], color: str, seed: int) -> 
         else:
             message = None
         example = cast(SerializedCase, check.example)
-        display_example(example, color, check.name, message, seed)
+        display_example(example, color, check.name, message, result)
         # Display every time except the last check
         if idx != len(checks):
             click.echo("\n")
 
 
+def produce_curl_command(
+    case: SerializedCase, path: str, method: str, request_example: str
+) -> str:
+    """Construct a curl command to reproduce this case."""
+    endpoint = path
+    start = request_example.find("'")
+    end = request_example.find(endpoint)
+    base_url = request_example[start:end] + endpoint + "'"
+
+    curl = "curl -X {method}"
+    headers = case.headers
+    if headers:
+        curl += " -H {headers}"
+    data = case.body
+    if data:
+        curl += " -d '{data}'"
+    curl += " {base_url}"
+
+    return curl.format(method=method, headers=headers, data=data, base_url=base_url)
+
+
+# pylint: disable=too-many-arguments
 def display_example(
     case: SerializedCase,
     color: str,
     check_name: Optional[str] = None,
     message: Optional[str] = None,
-    seed: Optional[int] = None,
+    result: SerializedTestResult = None,
 ) -> None:
     if message is not None:
         click.secho(message, fg=color)
@@ -222,13 +246,16 @@ def display_example(
         if (key == "Body" and value is not None) or value not in (None, {}):
             click.secho(template.format(key, value), fg=color)
     click.echo()
+    curl_example = produce_curl_command(
+        case, result.path, result.method, case.requests_code
+    )
     click.secho(
-        f"Run this Python code to reproduce this failure: \n\n    {case.requests_code}",
+        f"Run this code to reproduce this failure: \n\n    {curl_example}",
         fg=color,
     )
-    if seed is not None:
+    if result.seed is not None:
         click.secho(
-            f"\nOr add this option to your command line parameters: --hypothesis-seed={seed}",
+            f"\nOr add this option to your command line parameters: --hypothesis-seed={result.seed}",
             fg=color,
         )
 
